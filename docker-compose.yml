@@ -1,0 +1,22 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: campusos_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: campusos_chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  chroma_data:
