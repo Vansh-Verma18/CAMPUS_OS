@@ -17,8 +17,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # Gemini
+    # AI Provider
     GEMINI_API_KEY: str = ""
+    AI_PROVIDER: str = "gemini"
+    AI_MODEL: str = "gemini-1.5-flash"
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

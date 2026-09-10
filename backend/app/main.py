@@ -33,6 +33,7 @@ from app.api.v1.resources import router as resources_router
 from app.api.v1.registrations import router as registrations_router
 from app.api.v1.attendance import router as attendance_router
 from app.api.v1.expenses import router as expenses_router
+from app.api.v1.ai import router as ai_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -48,6 +49,7 @@ app.include_router(resources_router, prefix=f"{settings.API_V1_STR}/resources", 
 app.include_router(registrations_router, prefix=f"{settings.API_V1_STR}/registrations", tags=["registrations"])
 app.include_router(attendance_router, prefix=f"{settings.API_V1_STR}/attendance", tags=["attendance"])
 app.include_router(expenses_router, prefix=f"{settings.API_V1_STR}/expenses", tags=["expenses"])
+app.include_router(ai_router, prefix=f"{settings.API_V1_STR}/ai", tags=["ai"])
 
 # CORS config for local dev
 app.add_middleware(
