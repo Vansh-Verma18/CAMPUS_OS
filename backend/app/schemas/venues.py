@@ -1,9 +1,11 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import  List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.core import PyObjectId, generate_object_id
 
 class VenueBase(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     name: str
     location: str
     capacity: int = Field(ge=0)

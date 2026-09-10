@@ -1,10 +1,12 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.core import PyObjectId, generate_object_id
 
 class StudentBase(BaseModel):
-    user_id: PyObjectId
+    model_config = ConfigDict(populate_by_name=True)
+    user_id: Optional[PyObjectId] = None
     department_id: Optional[PyObjectId] = None
     enrollment_year: int
     current_semester: int

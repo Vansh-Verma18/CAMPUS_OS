@@ -26,6 +26,13 @@ async def lifespan(app: FastAPI):
     close_chroma_connection()
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.clubs import router as clubs_router
+from app.api.v1.events import router as events_router
+from app.api.v1.venues import router as venues_router
+from app.api.v1.resources import router as resources_router
+from app.api.v1.registrations import router as registrations_router
+from app.api.v1.attendance import router as attendance_router
+from app.api.v1.expenses import router as expenses_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -34,6 +41,13 @@ app = FastAPI(
 )
 
 app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(clubs_router, prefix=f"{settings.API_V1_STR}/clubs", tags=["clubs"])
+app.include_router(events_router, prefix=f"{settings.API_V1_STR}/events", tags=["events"])
+app.include_router(venues_router, prefix=f"{settings.API_V1_STR}/venues", tags=["venues"])
+app.include_router(resources_router, prefix=f"{settings.API_V1_STR}/resources", tags=["resources"])
+app.include_router(registrations_router, prefix=f"{settings.API_V1_STR}/registrations", tags=["registrations"])
+app.include_router(attendance_router, prefix=f"{settings.API_V1_STR}/attendance", tags=["attendance"])
+app.include_router(expenses_router, prefix=f"{settings.API_V1_STR}/expenses", tags=["expenses"])
 
 # CORS config for local dev
 app.add_middleware(

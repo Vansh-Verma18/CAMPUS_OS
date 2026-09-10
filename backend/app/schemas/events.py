@@ -1,9 +1,11 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import Optional, List
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from app.schemas.core import PyObjectId, generate_object_id
 
 class EventBase(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     title: str
     description: str
     category: str
@@ -16,7 +18,7 @@ class EventBase(BaseModel):
     target_audience: List[str] = Field(default_factory=list)
     required_resource_ids: List[PyObjectId] = Field(default_factory=list)
     status: str = Field(default="scheduled", description="Status: scheduled, ongoing, completed, cancelled")
-    created_by: PyObjectId
+    created_by: Optional[PyObjectId] = None
 
     @model_validator(mode='after')
     def check_dates(self):

@@ -1,15 +1,17 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.core import PyObjectId, generate_object_id
 
 class ExpenseBase(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     event_id: Optional[PyObjectId] = None
     category: str
     amount: float = Field(ge=0.0)
     currency: str = Field(default="USD")
     description: str
-    recorded_by: PyObjectId
+    recorded_by: Optional[PyObjectId] = None
     approved_by: Optional[PyObjectId] = None
     date: datetime
     status: str = Field(default="pending", description="Status: pending, approved, paid, rejected")

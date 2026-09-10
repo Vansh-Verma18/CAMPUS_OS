@@ -41,7 +41,9 @@ async def seed_data():
     admin_id = ObjectId()
     faculty_id = ObjectId()
     organizer_id = ObjectId()
+    organizer_2_id = ObjectId()
     student_id = ObjectId()
+    student_2_id = ObjectId()
 
     default_password = get_password_hash("password123")
 
@@ -49,64 +51,90 @@ async def seed_data():
         {"_id": admin_id, "email": "admin@campus.edu", "username": "admin", "role": "admin", "display_name": "System Admin", "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now},
         {"_id": faculty_id, "email": "prof.smith@campus.edu", "username": "smith", "role": "faculty", "display_name": "Dr. Smith", "department_id": cs_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now},
         {"_id": organizer_id, "email": "organizer@campus.edu", "username": "organizer", "role": "organizer", "display_name": "Event Organizer", "department_id": cs_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now},
-        {"_id": student_id, "email": "student@campus.edu", "username": "student", "role": "student", "display_name": "Alice Johnson", "department_id": math_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now}
+        {"_id": organizer_2_id, "email": "organizer2@campus.edu", "username": "organizer2", "role": "organizer", "display_name": "Arts Organizer", "department_id": math_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now},
+        {"_id": student_id, "email": "student@campus.edu", "username": "student", "role": "student", "display_name": "Alice Johnson", "department_id": math_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now},
+        {"_id": student_2_id, "email": "student2@campus.edu", "username": "student2", "role": "student", "display_name": "Bob Williams", "department_id": cs_dept_id, "account_status": "active", "password_hash": default_password, "created_at": now, "updated_at": now}
     ])
 
-    # 3. Students
-    await db["students"].insert_many([
-        {"_id": ObjectId(), "user_id": organizer_id, "department_id": cs_dept_id, "enrollment_year": 2023, "current_semester": 3, "interests": ["Events", "Tech"], "skills": ["Management"], "account_status": "active", "created_at": now, "updated_at": now},
-        {"_id": ObjectId(), "user_id": student_id, "department_id": math_dept_id, "enrollment_year": 2024, "current_semester": 1, "interests": ["Calculus"], "skills": ["Math"], "account_status": "active", "created_at": now, "updated_at": now}
-    ])
-
-    # 4. Faculty
-    await db["faculty"].insert_many([
-        {"_id": ObjectId(), "user_id": faculty_id, "department_id": cs_dept_id, "designation": "Professor", "account_status": "active", "created_at": now, "updated_at": now}
-    ])
-
-    # Update Department Head
-    await db["departments"].update_one({"_id": cs_dept_id}, {"$set": {"head_faculty_id": faculty_id}})
-
-    # 5. Clubs
+    # 3. Clubs
     coding_club_id = ObjectId()
-    await db["clubs"].insert_one({
-        "_id": coding_club_id, "name": "Coding Club", "description": "For programmers.", "category": "Academic", "department_id": cs_dept_id, "coordinator_id": organizer_id, "status": "active", "created_at": now, "updated_at": now
-    })
+    arts_club_id = ObjectId()
+    robotics_club_id = ObjectId()
+    await db["clubs"].insert_many([
+        {"_id": coding_club_id, "name": "Coding Club", "description": "For programmers.", "category": "Academic", "department_id": cs_dept_id, "coordinator_id": organizer_id, "status": "active", "created_at": now, "updated_at": now},
+        {"_id": arts_club_id, "name": "Arts Club", "description": "For artists.", "category": "Cultural", "department_id": math_dept_id, "coordinator_id": organizer_2_id, "status": "active", "created_at": now, "updated_at": now},
+        {"_id": robotics_club_id, "name": "Robotics Club", "description": "Building robots.", "category": "Academic", "department_id": cs_dept_id, "coordinator_id": organizer_id, "status": "active", "created_at": now, "updated_at": now}
+    ])
 
-    # 6. Venues
+    # 4. Venues
     hall_id = ObjectId()
-    await db["venues"].insert_one({
-        "_id": hall_id, "name": "Main Auditorium", "location": "Building A", "capacity": 500, "available_resources": ["Projector", "Sound System"], "status": "available", "created_at": now, "updated_at": now
-    })
+    lab_id = ObjectId()
+    await db["venues"].insert_many([
+        {"_id": hall_id, "name": "Main Auditorium", "location": "Building A", "capacity": 500, "available_resources": ["Projector", "Sound System"], "status": "available", "created_at": now, "updated_at": now},
+        {"_id": lab_id, "name": "Computer Lab 1", "location": "Building B", "capacity": 50, "available_resources": ["Computers", "Whiteboard"], "status": "available", "created_at": now, "updated_at": now}
+    ])
 
-    # 7. Resources
+    # 5. Resources
     projector_id = ObjectId()
-    await db["resources"].insert_one({
-        "_id": projector_id, "name": "Portable Projector", "category": "Equipment", "quantity": 5, "availability_status": "available", "created_at": now, "updated_at": now
-    })
+    sound_system_id = ObjectId()
+    await db["resources"].insert_many([
+        {"_id": projector_id, "name": "Portable Projector", "category": "Equipment", "quantity": 5, "availability_status": "available", "created_at": now, "updated_at": now},
+        {"_id": sound_system_id, "name": "Wireless Mics", "category": "Equipment", "quantity": 10, "availability_status": "available", "created_at": now, "updated_at": now}
+    ])
 
-    # 8. Events
+    # 6. Events
     event_1_id = ObjectId()
+    event_2_id = ObjectId()
+    event_3_id = ObjectId()
     event_start = now + timedelta(days=2)
     event_end = now + timedelta(days=2, hours=3)
-    await db["events"].insert_one({
-        "_id": event_1_id, "title": "Hackathon 2026", "description": "Annual coding event", "category": "Competition", "organizer_club_id": coding_club_id, "department_id": cs_dept_id, "venue_id": hall_id, "start_datetime": event_start, "end_datetime": event_end, "expected_participants": 100, "target_audience": ["Students"], "required_resource_ids": [projector_id], "status": "scheduled", "created_by": faculty_id, "created_at": now, "updated_at": now
-    })
+    await db["events"].insert_many([
+        {
+            "_id": event_1_id, "title": "Hackathon 2026", "description": "Annual coding event", "category": "Competition", 
+            "organizer_club_id": coding_club_id, "department_id": cs_dept_id, "venue_id": hall_id, 
+            "start_datetime": event_start, "end_datetime": event_end, "expected_participants": 100, 
+            "target_audience": ["Students"], "required_resource_ids": [projector_id], 
+            "status": "scheduled", "registration_enabled": True, "created_by": organizer_id, "created_at": now, "updated_at": now
+        },
+        {
+            "_id": event_2_id, "title": "Art Exhibition", "description": "Displaying student art", "category": "Cultural", 
+            "organizer_club_id": arts_club_id, "department_id": math_dept_id, "venue_id": hall_id, 
+            "start_datetime": now - timedelta(days=5), "end_datetime": now - timedelta(days=5, hours=-3), "expected_participants": 200, 
+            "target_audience": ["Everyone"], "required_resource_ids": [], 
+            "status": "completed", "registration_enabled": False, "created_by": organizer_2_id, "created_at": now, "updated_at": now
+        },
+        {
+            "_id": event_3_id, "title": "AI Workshop", "description": "Intro to neural networks", "category": "Academic", 
+            "organizer_club_id": robotics_club_id, "department_id": cs_dept_id, "venue_id": lab_id, 
+            "start_datetime": now + timedelta(days=10), "end_datetime": now + timedelta(days=10, hours=2), "expected_participants": 40, 
+            "target_audience": ["CS Students"], "required_resource_ids": [projector_id], 
+            "status": "scheduled", "registration_enabled": True, "created_by": organizer_id, "created_at": now, "updated_at": now
+        }
+    ])
 
-    # 9. Registrations
-    reg_id = ObjectId()
-    await db["registrations"].insert_one({
-        "_id": reg_id, "event_id": event_1_id, "user_id": student_id, "status": "registered", "attendance_status": "pending", "registration_timestamp": now, "updated_at": now
-    })
+    # 7. Registrations
+    await db["registrations"].insert_many([
+        {"_id": ObjectId(), "event_id": event_1_id, "user_id": student_id, "status": "confirmed", "created_at": now, "updated_at": now},
+        {"_id": ObjectId(), "event_id": event_3_id, "user_id": student_id, "status": "confirmed", "created_at": now, "updated_at": now},
+        {"_id": ObjectId(), "event_id": event_1_id, "user_id": student_2_id, "status": "confirmed", "created_at": now, "updated_at": now}
+    ])
+
+    # 8. Attendance
+    await db["attendance"].insert_many([
+        {"_id": ObjectId(), "event_id": event_2_id, "user_id": student_id, "status": "attended", "check_in_timestamp": now, "created_at": now, "updated_at": now},
+        {"_id": ObjectId(), "event_id": event_2_id, "user_id": student_2_id, "status": "attended", "check_in_timestamp": now, "created_at": now, "updated_at": now}
+    ])
+
+    # 9. Feedback
+    await db["feedback"].insert_many([
+        {"_id": ObjectId(), "event_id": event_2_id, "submitted_by": student_id, "rating": 5, "comments": "Great exhibition!", "tags": [], "submitted_timestamp": now}
+    ])
 
     # 10. Expenses
-    await db["expenses"].insert_one({
-        "_id": ObjectId(), "event_id": event_1_id, "category": "Food", "amount": 250.0, "currency": "USD", "description": "Pizza for hackathon", "recorded_by": admin_id, "date": now, "status": "pending", "created_at": now, "updated_at": now
-    })
-
-    # 11. Documents
-    await db["documents"].insert_one({
-        "_id": ObjectId(), "name": "Hackathon Rules", "document_type": "PDF", "source": "Upload", "department_id": cs_dept_id, "access_classification": "public", "storage_path": "/docs/hackathon_rules.pdf", "processing_status": "pending", "uploaded_by": faculty_id, "uploaded_timestamp": now, "updated_at": now
-    })
+    await db["expenses"].insert_many([
+        {"_id": ObjectId(), "event_id": event_1_id, "category": "Food", "amount": 250.0, "currency": "USD", "description": "Pizza for hackathon", "recorded_by": admin_id, "date": now, "status": "approved", "created_at": now, "updated_at": now},
+        {"_id": ObjectId(), "event_id": event_2_id, "category": "Supplies", "amount": 100.0, "currency": "USD", "description": "Canvas and paint", "recorded_by": organizer_2_id, "date": now, "status": "approved", "created_at": now, "updated_at": now}
+    ])
 
     logger.info("Seed data inserted successfully.")
     await close_mongo_connection()

@@ -27,7 +27,8 @@ async def setup_indexes():
             IndexModel([("start_datetime", ASCENDING)], background=True),
             IndexModel([("venue_id", ASCENDING)], background=True),
             IndexModel([("organizer_club_id", ASCENDING)], background=True),
-            IndexModel([("department_id", ASCENDING)], background=True)
+            IndexModel([("department_id", ASCENDING)], background=True),
+            IndexModel([("status", ASCENDING)], background=True)
         ])
 
         # 4. Attendance
@@ -38,6 +39,17 @@ async def setup_indexes():
         # 5. Documents
         await db["documents"].create_indexes([
             IndexModel([("access_classification", ASCENDING)], background=True)
+        ])
+        
+        # 6. Feedback
+        await db["feedback"].create_indexes([
+            IndexModel([("event_id", ASCENDING), ("submitted_by", ASCENDING)], unique=True, background=True)
+        ])
+        
+        # 7. Expenses
+        await db["expenses"].create_indexes([
+            IndexModel([("event_id", ASCENDING)], background=True),
+            IndexModel([("recorded_by", ASCENDING)], background=True)
         ])
 
         logger.info("Successfully created database indexes.")

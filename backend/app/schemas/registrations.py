@@ -1,10 +1,13 @@
+from typing import Optional
+from pydantic import ConfigDict
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.core import PyObjectId, generate_object_id
 
 class RegistrationBase(BaseModel):
-    event_id: PyObjectId
-    user_id: PyObjectId
+    model_config = ConfigDict(populate_by_name=True)
+    event_id: Optional[PyObjectId] = None
+    user_id: Optional[PyObjectId] = None
     status: str = Field(default="registered", description="Status: registered, waitlisted, cancelled")
     attendance_status: str = Field(default="pending", description="Status: pending, attended, missed")
 

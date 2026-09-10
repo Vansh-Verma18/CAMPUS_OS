@@ -1,9 +1,11 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 from app.schemas.core import PyObjectId, generate_object_id
 
 class UserBase(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     email: EmailStr
     username: str
     role: str = Field(..., description="Role of the user: admin, faculty, organizer, student")

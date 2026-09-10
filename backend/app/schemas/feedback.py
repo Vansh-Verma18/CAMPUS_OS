@@ -1,10 +1,12 @@
+from pydantic import ConfigDict
 from datetime import datetime, timezone
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.core import PyObjectId, generate_object_id
 
 class FeedbackBase(BaseModel):
-    event_id: PyObjectId
+    model_config = ConfigDict(populate_by_name=True)
+    event_id: Optional[PyObjectId] = None
     submitted_by: Optional[PyObjectId] = None
     rating: Optional[int] = Field(None, ge=1, le=5)
     comments: Optional[str] = None
