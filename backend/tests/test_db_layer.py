@@ -1,14 +1,13 @@
 import pytest
-import asyncio
-from bson import ObjectId
-from datetime import datetime
+import pytest_asyncio
+from typing import Any
 from pymongo.errors import DuplicateKeyError
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.db.mongodb import db, connect_to_mongo, close_mongo_connection, get_database
+from app.db.mongodb import connect_to_mongo, close_mongo_connection, get_database
 from app.repositories.base import BaseRepository
 from app.schemas.users import UserInDB, UserCreate
 from app.db.indexes import setup_indexes
-import pytest_asyncio
 
 @pytest_asyncio.fixture(scope="function")
 async def setup_db():
@@ -28,7 +27,7 @@ async def setup_db():
     await close_mongo_connection()
 
 @pytest.mark.asyncio
-async def test_repository_create_and_get(setup_db):
+async def test_repository_create_and_get(setup_db: AsyncIOMotorDatabase[Any]):
     user_repo = BaseRepository[UserInDB, UserCreate](setup_db["users"], UserInDB)
     
     user_data = UserCreate(
@@ -50,7 +49,7 @@ async def test_repository_create_and_get(setup_db):
     assert fetched_user.email == "testrepo@campus.edu"
 
 @pytest.mark.asyncio
-async def test_unique_email_index(setup_db):
+async def test_unique_email_index(setup_db: AsyncIOMotorDatabase[Any]):
     user_repo = BaseRepository[UserInDB, UserCreate](setup_db["users"], UserInDB)
     
     user_data = UserCreate(

@@ -29,7 +29,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType]):
         docs = await cursor.to_list(length=limit)
         return [self.model(**doc) for doc in docs]
 
-    async def create(self, obj_in: CreateSchemaType, **additional_data) -> ModelType:
+    async def create(self, obj_in: CreateSchemaType, **additional_data: Any) -> ModelType:
         obj_in_data = obj_in.model_dump()
         obj_in_data.update(additional_data)
         
