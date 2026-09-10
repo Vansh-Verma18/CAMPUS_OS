@@ -5,3 +5,6 @@ pydantic-settings
 motor
 chromadb
 email-validator
+PyJWT
+bcrypt
+python-multipart

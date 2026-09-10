@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import  List
 from pydantic import BaseModel, Field
 from app.schemas.core import PyObjectId, generate_object_id
 

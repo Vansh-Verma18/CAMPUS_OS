@@ -1,4 +1,3 @@
-import os
 import glob
 
 files_to_check = glob.glob('c:/Users/vansh/Desktop/CampusOS/backend/app/schemas/*.py') + \

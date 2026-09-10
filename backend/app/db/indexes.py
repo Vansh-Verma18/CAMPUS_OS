@@ -1,5 +1,5 @@
 import logging
-from pymongo import IndexModel, ASCENDING, DESCENDING
+from pymongo import IndexModel, ASCENDING
 from app.db.mongodb import get_database
 
 logger = logging.getLogger(__name__)

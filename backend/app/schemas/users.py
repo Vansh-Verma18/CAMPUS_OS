@@ -6,7 +6,7 @@ from app.schemas.core import PyObjectId, generate_object_id
 class UserBase(BaseModel):
     email: EmailStr
     username: str
-    role: str = Field(..., description="Role of the user: Admin, Student, Faculty")
+    role: str = Field(..., description="Role of the user: admin, faculty, organizer, student")
     display_name: str
     department_id: Optional[PyObjectId] = None
     club_id: Optional[PyObjectId] = None

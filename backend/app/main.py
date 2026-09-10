@@ -25,11 +25,15 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
     close_chroma_connection()
 
+from app.api.v1.auth import router as auth_router
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     lifespan=lifespan
 )
+
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 
 # CORS config for local dev
 app.add_middleware(
