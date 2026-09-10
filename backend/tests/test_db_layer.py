@@ -44,7 +44,7 @@ async def test_repository_create_and_get(setup_db: AsyncIOMotorDatabase[Any]):
     assert created_user.password_hash == "hashed!"
     assert hasattr(created_user, "id")
     
-    fetched_user = await user_repo.get_by_id(str(created_user.id))
+    fetched_user = await user_repo.get_by_id((created_user.id))
     assert fetched_user is not None
     assert fetched_user.email == "testrepo@campus.edu"
 

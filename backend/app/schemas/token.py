@@ -9,3 +9,7 @@ class Token(BaseModel):
 class TokenPayload(BaseModel):
     sub: str
     role: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str

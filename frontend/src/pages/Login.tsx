@@ -20,28 +20,28 @@ export const Login: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const formData = new URLSearchParams();
-            formData.append('username', email);
-            formData.append('password', password);
-
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: formData,
+                body: JSON.stringify({ email, password }),
             });
 
             if (response.ok) {
                 const data = await response.json();
                 login(data.access_token, data.user);
                 navigate(from, { replace: true });
+            } else if (response.status === 401) {
+                setError('Invalid email or password.');
+            } else if (response.status === 422) {
+                setError('Please provide both email and password.');
             } else {
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({}));
                 setError(errorData.detail || 'Failed to login');
             }
         } catch (err) {
-            setError('Network error occurred. Please try again.');
+            setError('Network error occurred. The backend server might be unavailable.');
         } finally {
             setIsLoading(false);
         }

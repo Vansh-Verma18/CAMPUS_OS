@@ -28,7 +28,7 @@ async def setup_db():
     yield db_conn
     
     # Teardown
-    await db_conn["users"].delete_many({})
+    await db_conn["users"].delete_many({"email": {"$in": ["teststudent@campus.edu", "inactive@campus.edu"]}})
     await close_mongo_connection()
 
 @pytest.mark.asyncio
@@ -86,8 +86,8 @@ async def test_auth_endpoints(setup_db: Any):
     
     # Test Login Endpoint
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post("/api/v1/auth/login", data={
-            "username": "teststudent@campus.edu",
+        response = await client.post("/api/v1/auth/login", json={
+            "email": "teststudent@campus.edu",
             "password": "password123"
         })
         assert response.status_code == 200
@@ -101,12 +101,31 @@ async def test_auth_endpoints(setup_db: Any):
         
         token = data["access_token"]
         
-        # Test Login Failures
-        response_fail = await client.post("/api/v1/auth/login", data={
-            "username": "teststudent@campus.edu",
+        # Test Login Failures (Wrong Password)
+        response_fail = await client.post("/api/v1/auth/login", json={
+            "email": "teststudent@campus.edu",
             "password": "wrongpassword"
         })
-        assert response_fail.status_code == 400
+        assert response_fail.status_code == 401
+        
+        # Test Login Failures (Unknown Email)
+        response_fail_email = await client.post("/api/v1/auth/login", json={
+            "email": "unknown@campus.edu",
+            "password": "password123"
+        })
+        assert response_fail_email.status_code == 401
+        
+        # Test Missing Email
+        response_missing_email = await client.post("/api/v1/auth/login", json={
+            "password": "password123"
+        })
+        assert response_missing_email.status_code == 422
+        
+        # Test Missing Password
+        response_missing_pass = await client.post("/api/v1/auth/login", json={
+            "email": "teststudent@campus.edu"
+        })
+        assert response_missing_pass.status_code == 422
         
         # Test /auth/me
         response_me = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
@@ -137,11 +156,11 @@ async def test_inactive_user_login(setup_db: Any):
     
     # 17. Inactive users cannot log in.
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post("/api/v1/auth/login", data={
-            "username": "inactive@campus.edu",
+        response = await client.post("/api/v1/auth/login", json={
+            "email": "inactive@campus.edu",
             "password": "password"
         })
-        assert response.status_code == 400
+        assert response.status_code == 401
         assert response.json()["detail"] == "Inactive user"
 
 def test_role_checker_logic():
