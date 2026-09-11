@@ -57,3 +57,7 @@ venv/
 .env_python
 env.bak/
 venv.bak/
+
+# Uploads and runtime data
+backend/uploads/
+backend/chroma_data/

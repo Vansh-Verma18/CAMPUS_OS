@@ -92,6 +92,7 @@ class AIRetrievalService:
         resource_repo: BaseRepository[Any, Any],
         registration_repo: BaseRepository[Any, Any],
         expense_repo: BaseRepository[Any, Any],
+        ai_provider: Any = None,
     ) -> None:
         self.event_repo = event_repo
         self.club_repo = club_repo
@@ -99,9 +100,10 @@ class AIRetrievalService:
         self.resource_repo = resource_repo
         self.registration_repo = registration_repo
         self.expense_repo = expense_repo
+        self.ai_provider = ai_provider
 
     async def get_evidence(
-        self, current_user: UserInDB
+        self, current_user: UserInDB, question: str = ""
     ) -> Dict[str, Any]:
         """
         Retrieve permission-scoped evidence for the given user.
@@ -219,6 +221,51 @@ class AIRetrievalService:
                 reg_by_event[eid] = reg_by_event.get(eid, 0) + 1
             evidence["registration_counts_by_event"] = reg_by_event
             sources.append("registrations")
+
+        # ── Vector Search: Institutional Memory ──────────────────────────────
+        if question and self.ai_provider:
+            try:
+                from app.db.chroma import get_memory_collection
+                collection = get_memory_collection()
+                
+                if collection:
+                    # 1. Embed the question
+                    q_embedding = await self.ai_provider.embed_content([question])
+                    if q_embedding and len(q_embedding) > 0:
+                        # 2. RBAC filter for documents
+                        where_filter = {}
+                        if role == "student":
+                            where_filter = {"access_classification": "PUBLIC"}
+                        elif role == "faculty":
+                            where_filter = {"access_classification": {"$in": ["PUBLIC", "DEPARTMENT"]}}
+                        elif role == "organizer":
+                            where_filter = {"access_classification": {"$in": ["PUBLIC", "CLUB"]}}
+                        # admin gets no filter (all access)
+                        
+                        # 3. Query ChromaDB
+                        results = collection.query(
+                            query_embeddings=q_embedding,
+                            n_results=5,
+                            where=where_filter if where_filter else None
+                        )
+                        
+                        if results and results.get("documents") and results["documents"][0]:
+                            retrieved_docs = []
+                            for i, doc_text in enumerate(results["documents"][0]):
+                                meta = results["metadatas"][0][i]
+                                retrieved_docs.append({
+                                    "text": doc_text,
+                                    "source": meta.get("document_name", "unknown"),
+                                    "year": meta.get("year", ""),
+                                    "department": meta.get("department", "")
+                                })
+                            
+                            if retrieved_docs:
+                                evidence["institutional_memory"] = retrieved_docs
+                                sources.append("institutional_memory")
+                                
+            except Exception as e:
+                logger.error(f"Failed to retrieve institutional memory: {e}")
 
         evidence["sources"] = sources
         return evidence

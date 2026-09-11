@@ -21,3 +21,15 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
 
     return response;
 }
+
+export async function detectEventConflicts(data: any) {
+    const res = await fetchWithAuth("/events/detect-conflicts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+        throw new Error("Failed to check conflicts");
+    }
+    return res.json();
+}

@@ -194,7 +194,7 @@ class AIAgentService:
 
         # Step 1: Retrieve permission-scoped evidence
         try:
-            evidence = await self.retrieval_service.get_evidence(current_user)
+            evidence = await self.retrieval_service.get_evidence(current_user, request.question)
         except Exception as exc:
             logger.error("Evidence retrieval failed: %s", exc)
             return AIQueryResponse(

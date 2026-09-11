@@ -139,3 +139,39 @@ def get_event_conflict_service(
     resource_repo: BaseRepository[ResourceInDB, ResourceCreate] = Depends(get_resource_repo)
 ) -> EventConflictService:
     return EventConflictService(event_repo, venue_repo, resource_repo)
+
+from app.schemas.documents import DocumentInDB, DocumentCreate
+from app.services.documents import DocumentService
+from app.services.ai_provider import get_ai_provider, AIProvider
+
+def get_document_repo(db: Any = Depends(get_database)) -> BaseRepository[DocumentInDB, DocumentCreate]:
+    return BaseRepository[DocumentInDB, DocumentCreate](db["documents"], DocumentInDB)
+
+def get_document_service(
+    repo: BaseRepository[DocumentInDB, DocumentCreate] = Depends(get_document_repo),
+    ai_provider: AIProvider = Depends(get_ai_provider)
+) -> DocumentService:
+    return DocumentService(repo, ai_provider)
+
+from app.schemas.attendance import AttendanceInDB, AttendanceCreate as _AttCreate
+from app.schemas.feedback import FeedbackInDB, FeedbackCreate as _FbCreate
+from app.services.analytics import AnalyticsService
+
+def get_analytics_service(
+    event_repo: BaseRepository[EventInDB, EventCreate] = Depends(get_event_repo),
+    club_repo: BaseRepository[ClubInDB, ClubCreate] = Depends(get_club_repo),
+    registration_repo: BaseRepository[RegistrationInDB, RegistrationCreate] = Depends(get_registration_repo),
+    attendance_repo: BaseRepository[AttendanceInDB, _AttCreate] = Depends(get_attendance_repo),
+    feedback_repo: BaseRepository[FeedbackInDB, _FbCreate] = Depends(get_feedback_repo),
+    expense_repo: BaseRepository[ExpenseInDB, ExpenseCreate] = Depends(get_expense_repo),
+    document_repo: BaseRepository[DocumentInDB, DocumentCreate] = Depends(get_document_repo),
+) -> AnalyticsService:
+    return AnalyticsService(
+        event_repo=event_repo,
+        club_repo=club_repo,
+        registration_repo=registration_repo,
+        attendance_repo=attendance_repo,
+        feedback_repo=feedback_repo,
+        expense_repo=expense_repo,
+        document_repo=document_repo,
+    )

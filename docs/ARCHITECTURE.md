@@ -1,31 +1,65 @@
-# Architecture Overview
+# CampusOS Architecture
 
-## Frontend
-The frontend is a single-page application (SPA) built with React and TypeScript, managed by Vite.
-- **Routing**: `react-router-dom` handles client-side routing.
-- **Styling**: Tailwind CSS is strictly used for styling with no inline styles.
-- **Service Boundaries**: All API communication occurs within `src/services/`. Components should not have direct fetch logic.
+## High-Level Design (Step 6)
 
-## Backend
-The backend is powered by FastAPI for its high performance and async capabilities.
-- **Routing**: API endpoints are versioned (e.g., `/api/v1/...`).
-- **Data Flow**: `API Route` -> `Service` -> `Repository` -> `MongoDB`.
-  - **API Route**: Receives requests, calls services, returns Pydantic Response schemas.
-  - **Service**: Handles business logic (e.g., event conflict detection, permission checks).
-  - **Repository**: Handles direct database operations using the `BaseRepository` abstraction.
-- **Validation**: Pydantic models in `app/schemas` enforce schema structure, valid types, and business rules (e.g., valid date ranges, non-negative amounts) before reaching the repository layer.
+### Frontend
+- React 18, TypeScript, Vite
+- TailwindCSS for styling
+- Core components: Authentication, Routing
+- Client API utility for authenticated fetch requests
+- Pages: Dashboard, EventPlanner, AIAgent (/ai)
 
-## Database (MongoDB)
-MongoDB is the authoritative source for structured institutional records.
-- **Connection**: Managed async using Motor.
-- **Security**: Database should not be exposed externally. Access is limited through the backend API.
-- **Design Philosophy**: We use referencing over embedding for major relationships to maintain scalable document sizes and ease of updates.
+### Backend API
+- FastAPI (Python 3.13)
+- JWT Authentication & Role-Based Access Control (RBAC)
+- Pydantic for request/response validation
 
-## Vector Database (ChromaDB)
-ChromaDB handles vector embeddings for institutional documents.
-- **Connection**: Managed via HTTP client.
-- **Isolation**: RAG processes and vector searches will be separated from general CRUD API routes.
+### Services Layer (Business Logic)
+- **BaseService**: Reusable logic for CRUD operations.
+- **Domain Services**: ClubService, EventService, VenueService, ResourceService, RegistrationService, AttendanceService, FeedbackService, ExpenseService.
+- **EventConflictService**: Deterministic conflict detection (venue, resource, audience overlap).
+- **AIAgentService**: AI query orchestration — retrieves evidence, builds prompts, calls LLM, parses structured response.
+- **AIRetrievalService**: Permission-aware data fetching — role-scoped evidence, LLM never receives unauthorized data.
+- **AIProvider / GeminiProvider**: Swappable LLM provider abstraction (Google Gemini, with MockProvider for tests).
+- Object-level ownership checks (e.g., organizers only modify their own events).
 
-## Future Integrations
-- **Gemini API**: Will power the AI Operations agent for analyzing institutional knowledge and conflict detection. Data passed to the LLM must be tightly controlled by Role-Based Access Control (RBAC).
-- **RAG Flow**: Documents are ingested, processed via PyMuPDF, embedded, and stored in ChromaDB. When users query, the context will be retrieved from ChromaDB before sending it to Gemini.
+### AI Operations Agent (Step 6)
+```
+User → POST /api/v1/ai/query (JWT auth)
+  → get_current_active_user (role from JWT only)
+  → AIAgentService
+    → AIRetrievalService  (permission-scoped evidence)
+    → EventConflictService (deterministic, if conflict question)
+    → GeminiProvider (evidence → LLM)
+  → AIQueryResponse { answer, claims[VERIFIED|DERIVED|RECOMMENDATION|INSUFFICIENT_EVIDENCE], sources }
+```
+
+**Security invariants:**
+- Role is NEVER accepted from request body — always from JWT.
+- LLM only receives data the authenticated user is authorized to see.
+- Deterministic conflict detection cannot be overridden by the LLM.
+- Provider failures return HTTP 503 with a safe message, never hallucinated data.
+- Financial data (expenses) is accessible only to admin role.
+
+**Response contract:**
+- `VERIFIED` — directly supported by retrieved institutional data
+- `DERIVED` — calculated or logically derived from retrieved data
+- `RECOMMENDATION` — AI-generated suggestion, clearly labelled
+- `INSUFFICIENT_EVIDENCE` — data is not sufficient to answer
+
+### Database Layer
+- **MongoDB**: Primary operational datastore.
+- **BaseRepository**: Abstract generic repository pattern over PyMongo.
+- **Collections**: `users`, `clubs`, `events`, `venues`, `resources`, `registrations`, `attendance`, `feedback`, `expenses`.
+- **Indexes**: Strategic compound and unique indexes for fast lookups and constraint enforcement.
+
+### Security Boundaries
+- **Route Level**: `RoleChecker` ensures only authorized roles hit the endpoint.
+- **Service Level**: Business rules and object-level permissions (e.g., fetching from DB and verifying `created_by` matches current user if the user is an organizer).
+- **AI Level**: `AIRetrievalService` enforces role-scoped evidence before any data reaches the LLM.
+- **Frontend**: Navigation guards. Do NOT trust frontend for security.
+
+### Testing
+- Pytest with `pytest-asyncio`
+- Comprehensive test suites validating RBAC, object ownership, validation, and business rules per domain.
+- AI tests mock the LLM provider — no real API key required.

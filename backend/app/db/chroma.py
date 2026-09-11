@@ -21,6 +21,10 @@ def connect_to_chroma():
         )
         # Simple health check
         chroma_db.client.heartbeat()
+        
+        # Ensure institutional_memory collection exists
+        chroma_db.client.get_or_create_collection(name="institutional_memory")
+        
         logger.info("Successfully connected to ChromaDB.")
     except Exception as e:
         logger.error(f"Could not connect to ChromaDB: {e}")
@@ -32,3 +36,8 @@ def close_chroma_connection():
 
 def get_chroma_client():
     return chroma_db.client
+    
+def get_memory_collection():
+    if chroma_db.client is None:
+        return None
+    return chroma_db.client.get_or_create_collection(name="institutional_memory")

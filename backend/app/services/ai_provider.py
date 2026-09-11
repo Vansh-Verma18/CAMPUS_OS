@@ -38,6 +38,22 @@ class AIProvider(ABC):
         """
         ...
 
+    @abstractmethod
+    async def embed_content(self, texts: list[str]) -> list[list[float]]:
+        """
+        Generate embeddings for a list of text chunks.
+        
+        Args:
+            texts: List of text strings to embed.
+            
+        Returns:
+            A list of embedding vectors (list of floats).
+            
+        Raises:
+            AIProviderError: On any provider-level failure.
+        """
+        ...
+
 
 class AIProviderError(Exception):
     """Raised when the AI provider fails to generate a response."""
@@ -57,6 +73,8 @@ class GeminiProvider(AIProvider):
                 )
             genai.configure(api_key=settings.GEMINI_API_KEY)
             self._model = genai.GenerativeModel(settings.AI_MODEL)
+            # Use recommended embedding model
+            self._embedding_model = "models/gemini-embedding-2"
             logger.info("GeminiProvider initialised with model=%s", settings.AI_MODEL)
         except ImportError as exc:
             raise AIProviderError(
@@ -81,6 +99,32 @@ class GeminiProvider(AIProvider):
         except Exception as exc:
             logger.error("Gemini generation failed: %s", exc)
             raise AIProviderError(f"Gemini generation failed: {exc}") from exc
+            
+    async def embed_content(self, texts: list[str]) -> list[list[float]]:
+        try:
+            import asyncio
+            import google.generativeai as genai  # type: ignore[import-untyped]
+            
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: genai.embed_content(
+                    model=self._embedding_model,
+                    content=texts,
+                    task_type="retrieval_document"
+                )
+            )
+            
+            # The API returns a dict with an 'embedding' key containing a list of embeddings
+            if isinstance(response, dict) and "embedding" in response:
+                return response["embedding"]
+            else:
+                logger.error("Unexpected embedding response format: %s", response)
+                raise AIProviderError("Unexpected response format from Gemini embed API")
+                
+        except Exception as exc:
+            logger.error("Gemini embedding failed: %s", exc)
+            raise AIProviderError(f"Gemini embedding failed: {exc}") from exc
 
 
 class MockProvider(AIProvider):
@@ -92,12 +136,23 @@ class MockProvider(AIProvider):
 
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         return (
-            "ANSWER: Based on the institutional data provided, here is the information you requested.\n"
-            "CLAIM[VERIFIED]: The data was retrieved from the CampusOS database. Source: events\n"
-            "CLAIM[DERIVED]: Counts were calculated from the available records. Source: events\n"
-            "CLAIM[RECOMMENDATION]: Consider scheduling events during off-peak periods.\n"
+            "ANSWER: Based on the institutional data provided, here is the information you requested.\n\n"
+            "CLAIMS:\n"
+            "- [VERIFIED] The data was retrieved from the CampusOS database. | source: events\n"
+            "- [DERIVED] Counts were calculated from the available records. | source: events\n"
+            "- [RECOMMENDATION] Consider scheduling events during off-peak periods.\n\n"
             "SOURCES: events, clubs"
         )
+        
+    async def embed_content(self, texts: list[str]) -> list[list[float]]:
+        # Return dummy deterministic embeddings (e.g., 768 dimensions)
+        # Using 0.1 for first token, 0.2 for second...
+        result = []
+        for text in texts:
+            # Just generate a dummy vector of length 768
+            vector = [0.01 * (len(text) % 100)] * 768
+            result.append(vector)
+        return result
 
 
 def get_ai_provider() -> AIProvider:

@@ -45,15 +45,6 @@ def _get_ai_agent_service():  # type: ignore[return]
     if db is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
 
-    retrieval = AIRetrievalService(
-        event_repo=BaseRepository[EventInDB, EventCreate](db["events"], EventInDB),
-        club_repo=BaseRepository[ClubInDB, ClubCreate](db["clubs"], ClubInDB),
-        venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
-        resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
-        registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
-        expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
-    )
-
     try:
         provider = get_ai_provider()
     except Exception as exc:
@@ -62,6 +53,16 @@ def _get_ai_agent_service():  # type: ignore[return]
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="AI service is not configured. Please contact the administrator."
         )
+
+    retrieval = AIRetrievalService(
+        event_repo=BaseRepository[EventInDB, EventCreate](db["events"], EventInDB),
+        club_repo=BaseRepository[ClubInDB, ClubCreate](db["clubs"], ClubInDB),
+        venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
+        resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
+        registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
+        ai_provider=provider,
+    )
 
     return AIAgentService(retrieval_service=retrieval, provider=provider)
 

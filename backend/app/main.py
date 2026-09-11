@@ -34,6 +34,8 @@ from app.api.v1.registrations import router as registrations_router
 from app.api.v1.attendance import router as attendance_router
 from app.api.v1.expenses import router as expenses_router
 from app.api.v1.ai import router as ai_router
+from app.api.v1.documents import router as documents_router
+from app.api.v1.analytics import router as analytics_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -50,6 +52,8 @@ app.include_router(registrations_router, prefix=f"{settings.API_V1_STR}/registra
 app.include_router(attendance_router, prefix=f"{settings.API_V1_STR}/attendance", tags=["attendance"])
 app.include_router(expenses_router, prefix=f"{settings.API_V1_STR}/expenses", tags=["expenses"])
 app.include_router(ai_router, prefix=f"{settings.API_V1_STR}/ai", tags=["ai"])
+app.include_router(documents_router, prefix=f"{settings.API_V1_STR}/documents", tags=["documents"])
+app.include_router(analytics_router, prefix=f"{settings.API_V1_STR}/analytics", tags=["analytics"])
 
 # CORS config for local dev
 app.add_middleware(

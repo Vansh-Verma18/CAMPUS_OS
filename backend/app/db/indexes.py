@@ -38,7 +38,8 @@ async def setup_indexes():
         
         # 5. Documents
         await db["documents"].create_indexes([
-            IndexModel([("access_classification", ASCENDING)], background=True)
+            IndexModel([("access_classification", ASCENDING)], background=True),
+            IndexModel([("uploaded_by", ASCENDING)], background=True)
         ])
         
         # 6. Feedback
