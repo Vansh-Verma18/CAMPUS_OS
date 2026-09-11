@@ -125,7 +125,7 @@ export const Dashboard: React.FC = () => {
                         marginBottom: 16,
                     }}>
                         <span>✨</span>
-                        <span>AI-Powered Assistant</span>
+                        <span>INSTITUTIONAL INTELLIGENCE</span>
                     </div>
                     <h2 style={{
                         fontSize: 24,
@@ -133,7 +133,7 @@ export const Dashboard: React.FC = () => {
                         margin: '0 0 12px',
                         letterSpacing: '-0.01em',
                     }}>
-                        Ask CampusOS anything about your institution
+                        Your institution's knowledge, connected.
                     </h2>
                     <p style={{ 
                         fontSize: 15, 
@@ -141,7 +141,7 @@ export const Dashboard: React.FC = () => {
                         opacity: 0.95,
                         lineHeight: 1.6,
                     }}>
-                        Get instant answers about events, clubs, schedules, attendance, and more. Our AI assistant has access to your entire institutional knowledge base.
+                        CampusOS connects events, people, resources, outcomes, and institutional records so your institution can understand what is happening, why it matters, and what should happen next.
                     </p>
                     <button
                         onClick={() => navigate('/ai')}
@@ -167,7 +167,7 @@ export const Dashboard: React.FC = () => {
                             e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                         }}
                     >
-                        Open AI Assistant →
+                        Ask CampusOS →
                     </button>
                 </div>
 

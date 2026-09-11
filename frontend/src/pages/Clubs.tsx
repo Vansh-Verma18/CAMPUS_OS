@@ -279,6 +279,32 @@ export default function Clubs() {
                                 onMouseEnter={e => handleCardHover(e, true)}
                                 onMouseLeave={e => handleCardHover(e, false)}
                             >
+                                {(() => {
+    const n = club.name.toLowerCase();
+
+    const image =
+        n.includes('phoenix')
+            ? '/campus-data/clubs/Phoenix/management_headphoenix.png'
+            : n.includes('sparks')
+            ? '/campus-data/clubs/SPARKS/sparks_img.jpg'
+            : n.includes('steppers')
+            ? '/campus-data/clubs/Steppers/steppers_achievement.jpg'
+            : null;
+
+    return image ? (
+        <img
+            src={image}
+            alt={club.name}
+            style={{
+                width: '100%',
+                height: 140,
+                objectFit: 'cover',
+                borderRadius: 10,
+                marginBottom: 12,
+            }}
+        />
+    ) : null;
+})()}
                                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
                                     <h3 style={{
                                         fontSize: 17,
