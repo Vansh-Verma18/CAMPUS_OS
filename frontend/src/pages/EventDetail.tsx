@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventsApi, type EventResponse } from '../api/events';
 import { registrationsApi, type RegistrationResponse } from '../api/registrations';
+import { FeedbackForm } from '../components/FeedbackForm';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
@@ -55,6 +56,11 @@ export default function EventDetail() {
     const [registering, setRegistering] = useState(false);
     const [registerError, setRegisterError] = useState<string | null>(null);
     const [registerSuccess, setRegisterSuccess] = useState(false);
+    
+    // Feedback state
+    const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+    const [hasFeedback, setHasFeedback] = useState(false);
+    const [feedbackSuccess, setFeedbackSuccess] = useState(false);
 
     const isStudent = user?.role === 'student';
 
@@ -67,12 +73,25 @@ export default function EventDetail() {
                 const data = await eventsApi.getEvent(id);
                 setEvent(data);
 
-                // If student, check if already registered
+                // If student, check if already registered and if feedback submitted
                 if (isStudent) {
                     try {
                         const myRegs = await registrationsApi.getMyRegistrations();
                         const existingReg = myRegs.find(r => r.event_id === id);
                         setRegistration(existingReg || null);
+                        
+                        // Check if feedback already submitted
+                        // We can't directly query feedback by user, so we'll try to get event feedback
+                        // and check if current user already submitted (only after event is completed)
+                        if (data.status === 'completed' && existingReg) {
+                            try {
+                                // This will fail with 403 for students, which is expected
+                                // We'll use the duplicate error when they try to submit instead
+                                setHasFeedback(false); // Default to false, will be caught on submit
+                            } catch {
+                                // Expected for students
+                            }
+                        }
                     } catch {
                         // Ignore registration fetch errors
                     }
@@ -125,6 +144,13 @@ export default function EventDetail() {
         } finally {
             setRegistering(false);
         }
+    };
+
+    const handleFeedbackSuccess = () => {
+        setShowFeedbackForm(false);
+        setHasFeedback(true);
+        setFeedbackSuccess(true);
+        setTimeout(() => setFeedbackSuccess(false), 5000);
     };
 
     if (loading) {
@@ -384,6 +410,67 @@ export default function EventDetail() {
                 )}
 
                 {/* Placeholder for future features */}
+                {/* Organizer/Admin/Faculty Actions */}
+                {!isStudent && (user?.role === 'admin' || user?.role === 'faculty' || event.created_by === user?._id) && (
+                    <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <button
+                            onClick={() => navigate(`/events/${id}/attendance`)}
+                            style={{
+                                width: '100%',
+                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                border: 'none',
+                                borderRadius: 12,
+                                padding: '14px 24px',
+                                color: '#fff',
+                                fontSize: 15,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 10,
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.boxShadow = '0 6px 24px rgba(99,102,241,0.4)';
+                            }}
+                            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                        >
+                            <span style={{ fontSize: 18 }}>📋</span>
+                            Manage Attendance
+                        </button>
+                        
+                        <button
+                            onClick={() => navigate(`/events/${id}/feedback`)}
+                            style={{
+                                width: '100%',
+                                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                                border: 'none',
+                                borderRadius: 12,
+                                padding: '14px 24px',
+                                color: '#fff',
+                                fontSize: 15,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 10,
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.boxShadow = '0 6px 24px rgba(139,92,246,0.4)';
+                            }}
+                            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                        >
+                            <span style={{ fontSize: 18 }}>💬</span>
+                            View Feedback
+                        </button>
+                    </div>
+                )}
+
                 {isStudent && (
                     <div style={{ marginBottom: 20 }}>
                         {registerSuccess && (
@@ -578,18 +665,97 @@ export default function EventDetail() {
                     </div>
                 )}
 
-                {!isStudent && (
-                    <div style={{
-                        background: 'rgba(99,102,241,0.06)',
-                        border: '1px solid rgba(99,102,241,0.15)',
-                        borderRadius: 14,
-                        padding: 24,
-                        textAlign: 'center',
-                    }}>
-                        <p style={{ fontSize: 14, color: '#818cf8', margin: 0 }}>
-                            📝 Attendance tracking and feedback features coming soon
-                        </p>
+                {/* Student Feedback Section */}
+                {isStudent && registration && event.status === 'completed' && (
+                    <div style={{ marginBottom: 20 }}>
+                        {feedbackSuccess && (
+                            <div style={{
+                                background: 'rgba(139,92,246,0.08)',
+                                border: '1px solid rgba(139,92,246,0.25)',
+                                borderRadius: 14,
+                                padding: '16px 20px',
+                                marginBottom: 16,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                            }}>
+                                <span style={{ fontSize: 20 }}>✓</span>
+                                <p style={{ fontSize: 14, color: '#a78bfa', margin: 0, fontWeight: 500 }}>
+                                    Thank you for your feedback!
+                                </p>
+                            </div>
+                        )}
+
+                        {!hasFeedback ? (
+                            <button
+                                onClick={() => setShowFeedbackForm(true)}
+                                style={{
+                                    width: '100%',
+                                    background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                                    border: 'none',
+                                    borderRadius: 12,
+                                    padding: '14px 24px',
+                                    color: '#fff',
+                                    fontSize: 15,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    fontFamily: 'inherit',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 10,
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(139,92,246,0.4)';
+                                }}
+                                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                            >
+                                <span style={{ fontSize: 18 }}>💬</span>
+                                Give Feedback
+                            </button>
+                        ) : (
+                            <div style={{
+                                background: '#0c1120',
+                                border: '1px solid rgba(139,92,246,0.25)',
+                                borderRadius: 14,
+                                padding: 20,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                            }}>
+                                <div style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: '50%',
+                                    background: 'rgba(139,92,246,0.15)',
+                                    border: '2px solid rgba(139,92,246,0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 18,
+                                }}>✓</div>
+                                <p style={{
+                                    fontSize: 15,
+                                    fontWeight: 600,
+                                    color: '#a78bfa',
+                                    margin: 0,
+                                }}>
+                                    Feedback Submitted
+                                </p>
+                            </div>
+                        )}
                     </div>
+                )}
+
+                {/* Feedback Form Modal */}
+                {showFeedbackForm && (
+                    <FeedbackForm 
+                        eventId={id!} 
+                        eventTitle={event.title}
+                        onSuccess={handleFeedbackSuccess}
+                        onCancel={() => setShowFeedbackForm(false)}
+                    />
                 )}
             </div>
         </div>

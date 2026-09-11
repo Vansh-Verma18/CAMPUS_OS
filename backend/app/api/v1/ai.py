@@ -36,6 +36,8 @@ def _get_ai_agent_service():  # type: ignore[return]
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
     from app.services.ai_retrieval import AIRetrievalService
     from app.services.ai_agent import AIAgentService
@@ -60,6 +62,8 @@ def _get_ai_agent_service():  # type: ignore[return]
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
         ai_provider=provider,
     )

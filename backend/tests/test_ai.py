@@ -152,6 +152,8 @@ async def test_student_cannot_receive_financial_data(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
 
     db = ctx["db"]
@@ -161,6 +163,8 @@ async def test_student_cannot_receive_financial_data(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
     evidence = await retrieval.get_evidence(ctx["student"])
@@ -189,6 +193,8 @@ async def test_admin_evidence_includes_institution_wide_data(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
 
     db = ctx["db"]
@@ -198,6 +204,8 @@ async def test_admin_evidence_includes_institution_wide_data(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
     evidence = await retrieval.get_evidence(ctx["admin"])
@@ -206,8 +214,8 @@ async def test_admin_evidence_includes_institution_wide_data(setup_db: Any):
     assert "events" in evidence
     assert "clubs" in evidence
     assert "venues" in evidence
-    # Admin should have registration analytics
-    assert "registration_counts_by_event" in evidence
+    # Admin should have participation summary with cross-domain metrics
+    assert "participation_summary" in evidence
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +272,8 @@ async def test_ai_service_handles_insufficient_evidence_safely(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
     from app.schemas.ai import AIQueryRequest
 
@@ -281,6 +291,8 @@ async def test_ai_service_handles_insufficient_evidence_safely(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
 
@@ -353,6 +365,8 @@ async def test_conflict_question_includes_conflict_hint(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
     from app.schemas.ai import AIQueryRequest
 
@@ -363,6 +377,8 @@ async def test_conflict_question_includes_conflict_hint(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
 
@@ -410,6 +426,8 @@ async def test_provider_failure_handled_safely(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
     from app.schemas.ai import AIQueryRequest
 
@@ -420,6 +438,8 @@ async def test_provider_failure_handled_safely(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
 
@@ -457,6 +477,8 @@ async def test_student_role_scoped_evidence(setup_db: Any):
     from app.schemas.venues import VenueInDB, VenueCreate
     from app.schemas.resources import ResourceInDB, ResourceCreate
     from app.schemas.registrations import RegistrationInDB, RegistrationCreate
+    from app.schemas.attendance import AttendanceInDB, AttendanceCreate
+    from app.schemas.feedback import FeedbackInDB, FeedbackCreate
     from app.schemas.expenses import ExpenseInDB, ExpenseCreate
 
     db = setup_db["db"]
@@ -466,6 +488,8 @@ async def test_student_role_scoped_evidence(setup_db: Any):
         venue_repo=BaseRepository[VenueInDB, VenueCreate](db["venues"], VenueInDB),
         resource_repo=BaseRepository[ResourceInDB, ResourceCreate](db["resources"], ResourceInDB),
         registration_repo=BaseRepository[RegistrationInDB, RegistrationCreate](db["registrations"], RegistrationInDB),
+        attendance_repo=BaseRepository[AttendanceInDB, AttendanceCreate](db["attendance"], AttendanceInDB),
+        feedback_repo=BaseRepository[FeedbackInDB, FeedbackCreate](db["feedback"], FeedbackInDB),
         expense_repo=BaseRepository[ExpenseInDB, ExpenseCreate](db["expenses"], ExpenseInDB),
     )
 
@@ -483,7 +507,7 @@ async def test_student_role_scoped_evidence(setup_db: Any):
 
     # Admin MUST have full access
     assert "venues" in admin_evidence
-    assert "registration_counts_by_event" in admin_evidence
+    assert "participation_summary" in admin_evidence
 
     # Roles are correctly recorded
     assert student_evidence["role"] == "student"

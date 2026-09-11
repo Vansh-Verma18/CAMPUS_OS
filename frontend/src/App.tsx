@@ -8,6 +8,10 @@ import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import MyRegistrations from './pages/MyRegistrations';
 import EventPlanner from './pages/EventPlanner';
+import Clubs from './pages/Clubs';
+import ClubDetail from './pages/ClubDetail';
+import Attendance from './pages/Attendance';
+import EventFeedback from './pages/EventFeedback';
 import AIAgent from './pages/AIAgent';
 import InstitutionalMemory from './pages/InstitutionalMemory';
 import Analytics from './pages/Analytics';
@@ -56,6 +60,38 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout><EventPlanner /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clubs"
+            element={
+              <ProtectedRoute>
+                <Layout><Clubs /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clubs/:id"
+            element={
+              <ProtectedRoute>
+                <Layout><ClubDetail /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events/:id/attendance"
+            element={
+              <ProtectedRoute>
+                <Layout><Attendance /></Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events/:id/feedback"
+            element={
+              <ProtectedRoute>
+                <Layout><EventFeedback /></Layout>
               </ProtectedRoute>
             }
           />

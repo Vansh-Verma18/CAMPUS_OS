@@ -3,17 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ROLE_COLOR: Record<string, string> = {
-    admin: '#a78bfa',
-    faculty: '#60a5fa',
-    organizer: '#34d399',
-    student: '#fbbf24',
+    admin: '#4c51bf',
+    faculty: '#3182ce',
+    organizer: '#38a169',
+    student: '#d69e2e',
 };
 
 const ROLE_BG: Record<string, string> = {
-    admin: 'rgba(167,139,250,0.12)',
-    faculty: 'rgba(96,165,250,0.12)',
-    organizer: 'rgba(52,211,153,0.12)',
-    student: 'rgba(251,191,36,0.12)',
+    admin: '#eef2ff',
+    faculty: '#ebf8ff',
+    organizer: '#f0fff4',
+    student: '#fffaf0',
 };
 
 interface NavItem {
@@ -26,6 +26,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: '⊞' },
     { path: '/events', label: 'Events', icon: '📅' },
+    { path: '/clubs', label: 'Clubs', icon: '🏛️' },
     { path: '/my-registrations', label: 'My Registrations', icon: '🎟️', roles: ['student'] },
     { path: '/ai', label: 'AI Agent', icon: '✦' },
     { path: '/event-planner', label: 'Event Planner', icon: '⊕', roles: ['admin', 'faculty', 'organizer'] },
@@ -38,6 +39,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
+    const [searchFocused, setSearchFocused] = useState(false);
 
     if (!user) return null;
 
@@ -45,40 +47,31 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         item => !item.roles || item.roles.includes(user.role)
     );
 
-    const roleColor = ROLE_COLOR[user.role] ?? '#94a3b8';
-    const roleBg = ROLE_BG[user.role] ?? 'rgba(148,163,184,0.12)';
+    const roleColor = ROLE_COLOR[user.role] ?? '#4a5568';
+    const roleBg = ROLE_BG[user.role] ?? '#f7fafc';
     const initials = user.display_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
+    // Get current page title
+    const currentItem = NAV_ITEMS.find(item => item.path === location.pathname);
+    const pageTitle = currentItem?.label ?? 'CampusOS';
 
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#080c18',
+            background: '#f8f9fb',
             display: 'flex',
-            fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-            color: '#e2e8f0',
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+            color: '#1a2332',
         }}>
-            {/* Global font import */}
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-                * { box-sizing: border-box; margin: 0; padding: 0; }
-                ::-webkit-scrollbar { width: 5px; }
-                ::-webkit-scrollbar-track { background: transparent; }
-                ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes spin { to { transform: rotate(360deg); } }
-                @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-                @keyframes gradientShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-            `}</style>
-
             {/* Sidebar */}
             <aside style={{
-                width: collapsed ? 64 : 240,
+                width: collapsed ? 72 : 260,
                 minHeight: '100vh',
-                background: '#0c1120',
-                borderRight: '1px solid rgba(255,255,255,0.06)',
+                background: '#ffffff',
+                borderRight: '1px solid #e2e8f0',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'width 0.25s ease',
+                transition: 'width 0.2s ease',
                 flexShrink: 0,
                 position: 'sticky',
                 top: 0,
@@ -87,33 +80,33 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             }}>
                 {/* Logo */}
                 <div style={{
-                    padding: collapsed ? '20px 16px' : '20px 20px',
-                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    padding: collapsed ? '24px 16px' : '24px',
+                    borderBottom: '1px solid #edf2f7',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 12,
                     justifyContent: collapsed ? 'center' : 'space-between',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
                         onClick={() => navigate('/dashboard')}>
                         <div style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 9,
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            width: 36,
+                            height: 36,
+                            borderRadius: 8,
+                            background: '#4c51bf',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: 15,
+                            fontSize: 18,
                             flexShrink: 0,
-                            boxShadow: '0 4px 12px rgba(99,102,241,0.35)',
-                        }}>⚡</div>
+                            color: '#ffffff',
+                        }}>🎓</div>
                         {!collapsed && (
                             <span style={{
-                                fontWeight: 700,
-                                fontSize: 16,
-                                color: '#f1f5f9',
-                                letterSpacing: '-0.02em',
+                                fontWeight: 600,
+                                fontSize: 18,
+                                color: '#1a2332',
+                                letterSpacing: '-0.01em',
                                 whiteSpace: 'nowrap',
                             }}>CampusOS</span>
                         )}
@@ -124,15 +117,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                color: '#475569',
+                                color: '#718096',
                                 cursor: 'pointer',
-                                fontSize: 14,
+                                fontSize: 18,
                                 padding: 4,
                                 borderRadius: 4,
                                 lineHeight: 1,
                             }}
                             title="Collapse sidebar"
-                        >◀</button>
+                        >←</button>
                     )}
                     {collapsed && (
                         <button
@@ -140,31 +133,33 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             style={{
                                 position: 'absolute',
                                 left: '50%',
-                                bottom: 70,
+                                bottom: 80,
                                 transform: 'translateX(-50%)',
-                                background: 'none',
-                                border: 'none',
-                                color: '#475569',
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                color: '#718096',
                                 cursor: 'pointer',
                                 fontSize: 14,
-                                padding: 4,
+                                padding: '6px 8px',
+                                borderRadius: 6,
+                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                             }}
                             title="Expand sidebar"
-                        >▶</button>
+                        >→</button>
                     )}
                 </div>
 
                 {/* Nav */}
-                <nav style={{ flex: 1, padding: '12px 8px', overflow: 'hidden' }}>
+                <nav style={{ flex: 1, padding: '16px 12px', overflow: 'auto' }}>
                     {!collapsed && (
                         <p style={{
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: 600,
-                            color: '#334155',
-                            letterSpacing: '0.08em',
+                            color: '#718096',
+                            letterSpacing: '0.05em',
                             textTransform: 'uppercase',
                             padding: '0 12px',
-                            marginBottom: 8,
+                            marginBottom: 12,
                         }}>Navigation</p>
                     )}
                     {visibleNav.map(item => {
@@ -178,54 +173,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: collapsed ? 0 : 10,
+                                    gap: collapsed ? 0 : 12,
                                     justifyContent: collapsed ? 'center' : 'flex-start',
-                                    padding: collapsed ? '10px 0' : '9px 12px',
-                                    borderRadius: 9,
+                                    padding: collapsed ? '12px 0' : '10px 12px',
+                                    borderRadius: 8,
                                     border: 'none',
                                     cursor: 'pointer',
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: isActive ? 600 : 400,
                                     fontFamily: 'inherit',
-                                    color: isActive ? '#c7d2fe' : '#64748b',
-                                    background: isActive
-                                        ? 'rgba(99,102,241,0.12)'
-                                        : 'transparent',
-                                    borderLeft: isActive && !collapsed
-                                        ? '2px solid #6366f1'
-                                        : '2px solid transparent',
-                                    marginBottom: 2,
+                                    color: isActive ? '#4c51bf' : '#4a5568',
+                                    background: isActive ? '#eef2ff' : 'transparent',
+                                    marginBottom: 4,
                                     transition: 'all 0.15s ease',
                                     textAlign: 'left',
                                 }}
                                 onMouseEnter={e => {
                                     if (!isActive) {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                                        e.currentTarget.style.color = '#94a3b8';
+                                        e.currentTarget.style.background = '#f7fafc';
+                                        e.currentTarget.style.color = '#1a2332';
                                     }
                                 }}
                                 onMouseLeave={e => {
                                     if (!isActive) {
                                         e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#64748b';
+                                        e.currentTarget.style.color = '#4a5568';
                                     }
                                 }}
                             >
-                                <span style={{ fontSize: 16, lineHeight: 1, flexShrink: 0 }}>{item.icon}</span>
+                                <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{item.icon}</span>
                                 {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
-                                {!collapsed && item.path === '/ai' && (
-                                    <span style={{
-                                        marginLeft: 'auto',
-                                        fontSize: 9,
-                                        fontWeight: 700,
-                                        letterSpacing: '0.06em',
-                                        textTransform: 'uppercase',
-                                        color: '#6366f1',
-                                        background: 'rgba(99,102,241,0.15)',
-                                        padding: '1px 6px',
-                                        borderRadius: 4,
-                                    }}>AI</span>
-                                )}
                             </button>
                         );
                     })}
@@ -233,36 +210,49 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
                 {/* User card */}
                 <div style={{
-                    padding: collapsed ? '12px 8px' : '12px',
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    padding: collapsed ? '16px 12px' : '16px',
+                    borderTop: '1px solid #edf2f7',
                 }}>
                     {!collapsed ? (
                         <div style={{
                             background: roleBg,
-                            border: `1px solid ${roleColor}22`,
+                            border: `1px solid ${roleColor}33`,
                             borderRadius: 10,
-                            padding: '10px 12px',
+                            padding: '12px',
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                                 <div style={{
-                                    width: 30,
-                                    height: 30,
+                                    width: 36,
+                                    height: 36,
                                     borderRadius: '50%',
-                                    background: `linear-gradient(135deg, ${roleColor}66, ${roleColor}33)`,
-                                    border: `1px solid ${roleColor}44`,
+                                    background: roleColor,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    color: roleColor,
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    color: '#ffffff',
                                     flexShrink: 0,
                                 }}>{initials}</div>
-                                <div style={{ overflow: 'hidden' }}>
-                                    <p style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ overflow: 'hidden', flex: 1 }}>
+                                    <p style={{ 
+                                        fontSize: 14, 
+                                        fontWeight: 600, 
+                                        color: '#1a2332', 
+                                        whiteSpace: 'nowrap', 
+                                        overflow: 'hidden', 
+                                        textOverflow: 'ellipsis',
+                                        marginBottom: 2,
+                                    }}>
                                         {user.display_name}
                                     </p>
-                                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: roleColor }}>
+                                    <p style={{ 
+                                        fontSize: 11, 
+                                        fontWeight: 600, 
+                                        letterSpacing: '0.03em', 
+                                        textTransform: 'uppercase', 
+                                        color: roleColor 
+                                    }}>
                                         {user.role}
                                     </p>
                                 </div>
@@ -271,24 +261,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 onClick={() => { logout(); navigate('/login'); }}
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.08)',
-                                    color: '#64748b',
-                                    padding: '5px 0',
+                                    background: '#ffffff',
+                                    border: '1px solid #e2e8f0',
+                                    color: '#4a5568',
+                                    padding: '8px 0',
                                     borderRadius: 6,
-                                    fontSize: 11,
+                                    fontSize: 13,
                                     fontWeight: 500,
                                     cursor: 'pointer',
                                     fontFamily: 'inherit',
                                     transition: 'all 0.15s',
                                 }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#94a3b8';
-                                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                    e.currentTarget.style.color = '#1a2332';
+                                    e.currentTarget.style.background = '#f7fafc';
+                                    e.currentTarget.style.borderColor = '#cbd5e0';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.color = '#64748b';
-                                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                                    e.currentTarget.style.color = '#4a5568';
+                                    e.currentTarget.style.background = '#ffffff';
+                                    e.currentTarget.style.borderColor = '#e2e8f0';
                                 }}
                             >Sign out</button>
                         </div>
@@ -300,9 +292,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 width: '100%',
                                 background: 'none',
                                 border: 'none',
-                                color: '#475569',
+                                color: '#718096',
                                 cursor: 'pointer',
-                                fontSize: 16,
+                                fontSize: 18,
                                 padding: '8px 0',
                                 textAlign: 'center',
                             }}
@@ -311,10 +303,78 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </div>
             </aside>
 
-            {/* Main content */}
-            <main style={{ flex: 1, minWidth: 0, overflowY: 'auto', minHeight: '100vh' }}>
-                {children}
-            </main>
+            {/* Main content area with top header */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                {/* Top header */}
+                <header style={{
+                    background: '#ffffff',
+                    borderBottom: '1px solid #e2e8f0',
+                    padding: '16px 32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 24,
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                }}>
+                    {/* Breadcrumb / Page title */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 18, color: '#1a2332', fontWeight: 600 }}>
+                            {pageTitle}
+                        </span>
+                    </div>
+
+                    {/* Search bar - "Ask CampusOS" */}
+                    <div style={{ flex: 1, maxWidth: 480 }}>
+                        <button
+                            onClick={() => navigate('/ai')}
+                            onFocus={() => setSearchFocused(true)}
+                            onBlur={() => setSearchFocused(false)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '10px 16px',
+                                background: '#f8f9fb',
+                                border: searchFocused ? '1px solid #4c51bf' : '1px solid #e2e8f0',
+                                borderRadius: 8,
+                                fontSize: 14,
+                                color: '#718096',
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                transition: 'all 0.15s',
+                                textAlign: 'left',
+                            }}
+                            onMouseEnter={e => {
+                                if (!searchFocused) e.currentTarget.style.borderColor = '#cbd5e0';
+                            }}
+                            onMouseLeave={e => {
+                                if (!searchFocused) e.currentTarget.style.borderColor = '#e2e8f0';
+                            }}
+                        >
+                            <span style={{ fontSize: 16 }}>🔍</span>
+                            <span>Ask CampusOS anything...</span>
+                            <span style={{ 
+                                marginLeft: 'auto', 
+                                fontSize: 11, 
+                                background: '#ffffff', 
+                                padding: '2px 8px', 
+                                borderRadius: 4,
+                                border: '1px solid #e2e8f0',
+                                color: '#4a5568',
+                                fontWeight: 500,
+                            }}>AI</span>
+                        </button>
+                    </div>
+                </header>
+
+                {/* Page content */}
+                <main style={{ flex: 1, overflowY: 'auto' }}>
+                    {children}
+                </main>
+            </div>
         </div>
     );
 };
