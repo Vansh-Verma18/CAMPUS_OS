@@ -6,10 +6,10 @@ import { FeedbackForm } from '../components/FeedbackForm';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-    scheduled: { bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.25)', text: '#60a5fa' },
-    ongoing: { bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.25)', text: '#22c55e' },
-    completed: { bg: 'rgba(148,163,184,0.08)', border: 'rgba(148,163,184,0.25)', text: '#94a3b8' },
-    cancelled: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', text: '#ef4444' },
+    scheduled: { bg: '#eef2ff', border: '#c3dafe', text: '#4c51bf' },
+    ongoing: { bg: '#f0fff4', border: '#9ae6b4', text: '#38a169' },
+    completed: { bg: '#f7fafc', border: '#e2e8f0', text: '#718096' },
+    cancelled: { bg: '#fff5f5', border: '#feb2b2', text: '#e53e3e' },
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -30,11 +30,11 @@ function StatusBadge({ status }: { status: string }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 5,
-            padding: '4px 12px',
-            borderRadius: 999,
+            padding: '6px 12px',
+            borderRadius: 6,
             fontSize: 12,
             fontWeight: 600,
-            letterSpacing: '0.05em',
+            letterSpacing: '0.03em',
             textTransform: 'uppercase',
             background: config.bg,
             border: `1px solid ${config.border}`,
@@ -157,9 +157,9 @@ export default function EventDetail() {
         return (
             <div style={{
                 minHeight: '100vh',
-                background: '#080c18',
-                color: '#e2e8f0',
-                fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+                background: '#f8f9fb',
+                color: '#1a2332',
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -168,15 +168,15 @@ export default function EventDetail() {
                     <div style={{
                         width: 48,
                         height: 48,
-                        border: '3px solid rgba(99,102,241,0.3)',
-                        borderTopColor: '#6366f1',
+                        border: '3px solid #edf2f7',
+                        borderTopColor: '#4c51bf',
                         borderRadius: '50%',
                         display: 'inline-block',
                         animation: 'spin 0.8s linear infinite',
                         marginBottom: 16,
                     }} />
                     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                    <p style={{ color: '#64748b', fontSize: 14 }}>Loading event details...</p>
+                    <p style={{ color: '#4a5568', fontSize: 14 }}>Loading event details...</p>
                 </div>
             </div>
         );
@@ -186,33 +186,40 @@ export default function EventDetail() {
         return (
             <div style={{
                 minHeight: '100vh',
-                background: '#080c18',
-                color: '#e2e8f0',
-                fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+                background: '#f8f9fb',
+                color: '#1a2332',
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
                 <div style={{ textAlign: 'center', maxWidth: 400 }}>
                     <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-                    <h2 style={{ fontSize: 20, fontWeight: 600, color: '#f1f5f9', margin: '0 0 8px' }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 600, color: '#1a2332', margin: '0 0 8px' }}>
                         Event Not Found
                     </h2>
-                    <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>
+                    <p style={{ color: '#4a5568', fontSize: 14, marginBottom: 24 }}>
                         {error || 'The event you are looking for does not exist or has been removed.'}
                     </p>
                     <button
                         onClick={() => navigate('/events')}
                         style={{
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            background: '#4c51bf',
                             border: 'none',
-                            borderRadius: 10,
-                            padding: '10px 24px',
+                            borderRadius: 8,
+                            padding: '12px 24px',
                             color: '#fff',
                             fontSize: 14,
                             fontWeight: 600,
                             cursor: 'pointer',
                             fontFamily: 'inherit',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = '#434190';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = '#4c51bf';
                         }}
                     >
                         ← Back to Events
@@ -246,28 +253,38 @@ export default function EventDetail() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#080c18',
-            color: '#e2e8f0',
-            fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-            padding: '40px 40px 80px',
+            background: '#f8f9fb',
+            color: '#1a2332',
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+            padding: '32px',
         }}>
-            <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                 {/* Back button */}
                 <button
                     onClick={() => navigate('/events')}
                     style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
                         borderRadius: 8,
-                        padding: '8px 16px',
-                        color: '#94a3b8',
-                        fontSize: 13,
+                        padding: '10px 16px',
+                        color: '#4a5568',
+                        fontSize: 14,
                         cursor: 'pointer',
                         fontFamily: 'inherit',
-                        marginBottom: 28,
+                        marginBottom: 24,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 8,
+                        fontWeight: 500,
+                        transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                        e.currentTarget.style.background = '#f7fafc';
+                        e.currentTarget.style.borderColor = '#cbd5e0';
+                    }}
+                    onMouseLeave={e => {
+                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
                     }}
                 >
                     ← Back to Events
@@ -275,39 +292,40 @@ export default function EventDetail() {
 
                 {/* Event Header */}
                 <div style={{
-                    background: '#0c1120',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 16,
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 12,
                     padding: 32,
                     marginBottom: 20,
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 20 }}>
                         <span style={{ fontSize: 48, lineHeight: 1 }}>{icon}</span>
                         <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
                                 <StatusBadge status={event.status} />
                                 <span style={{
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    letterSpacing: '0.06em',
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    letterSpacing: '0.03em',
                                     textTransform: 'uppercase',
-                                    color: '#64748b',
+                                    color: '#718096',
                                 }}>
                                     {event.category}
                                 </span>
                             </div>
                             <h1 style={{
-                                fontSize: 32,
-                                fontWeight: 700,
-                                letterSpacing: '-0.02em',
-                                color: '#f1f5f9',
+                                fontSize: 28,
+                                fontWeight: 600,
+                                letterSpacing: '-0.01em',
+                                color: '#1a2332',
                                 margin: '0 0 12px',
                             }}>
                                 {event.title}
                             </h1>
                             <p style={{
-                                fontSize: 16,
-                                color: '#94a3b8',
+                                fontSize: 15,
+                                color: '#4a5568',
                                 lineHeight: 1.7,
                                 margin: 0,
                             }}>
@@ -317,58 +335,60 @@ export default function EventDetail() {
                     </div>
                 </div>
 
-                {/* Event Details Grid */}
+                {/* Two-column layout */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: 16,
+                    gap: 20,
                     marginBottom: 20,
                 }}>
                     {/* Date & Time */}
                     <div style={{
-                        background: '#0c1120',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        borderRadius: 14,
-                        padding: 20,
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        padding: 24,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                     }}>
                         <p style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            letterSpacing: '0.06em',
+                            letterSpacing: '0.05em',
                             textTransform: 'uppercase',
-                            color: '#64748b',
-                            margin: '0 0 12px',
+                            color: '#718096',
+                            margin: '0 0 16px',
                         }}>Date & Time</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                            <span style={{ fontSize: 18 }}>📅</span>
-                            <span style={{ fontSize: 14, color: '#e2e8f0' }}>{formatDate(startDate)}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                            <span style={{ fontSize: 20 }}>📅</span>
+                            <span style={{ fontSize: 15, color: '#1a2332', fontWeight: 500 }}>{formatDate(startDate)}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 18 }}>🕐</span>
-                            <span style={{ fontSize: 14, color: '#94a3b8' }}>
-                                {formatTime(startDate)} - {formatTime(endDate)}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: 20 }}>🕐</span>
+                            <span style={{ fontSize: 14, color: '#4a5568' }}>
+                                {formatTime(startDate)} – {formatTime(endDate)}
                             </span>
                         </div>
                     </div>
 
                     {/* Capacity */}
                     <div style={{
-                        background: '#0c1120',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        borderRadius: 14,
-                        padding: 20,
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        padding: 24,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                     }}>
                         <p style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            letterSpacing: '0.06em',
+                            letterSpacing: '0.05em',
                             textTransform: 'uppercase',
-                            color: '#64748b',
-                            margin: '0 0 12px',
+                            color: '#718096',
+                            margin: '0 0 16px',
                         }}>Expected Participants</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontSize: 18 }}>👥</span>
-                            <span style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <span style={{ fontSize: 20 }}>👥</span>
+                            <span style={{ fontSize: 28, fontWeight: 700, color: '#1a2332' }}>
                                 {event.expected_participants}
                             </span>
                         </div>
@@ -378,29 +398,31 @@ export default function EventDetail() {
                 {/* Target Audience */}
                 {event.target_audience.length > 0 && (
                     <div style={{
-                        background: '#0c1120',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        borderRadius: 14,
-                        padding: 20,
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        padding: 24,
                         marginBottom: 20,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                     }}>
                         <p style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            letterSpacing: '0.06em',
+                            letterSpacing: '0.05em',
                             textTransform: 'uppercase',
-                            color: '#64748b',
-                            margin: '0 0 12px',
+                            color: '#718096',
+                            margin: '0 0 16px',
                         }}>Target Audience</p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                             {event.target_audience.map((audience, i) => (
                                 <span key={i} style={{
                                     fontSize: 13,
-                                    color: '#818cf8',
-                                    background: 'rgba(99,102,241,0.08)',
-                                    border: '1px solid rgba(99,102,241,0.15)',
+                                    color: '#4c51bf',
+                                    background: '#eef2ff',
+                                    border: '1px solid #c3dafe',
                                     padding: '6px 12px',
-                                    borderRadius: 8,
+                                    borderRadius: 6,
+                                    fontWeight: 500,
                                 }}>
                                     {audience}
                                 </span>
@@ -409,7 +431,44 @@ export default function EventDetail() {
                     </div>
                 )}
 
-                {/* Placeholder for future features */}
+                {/* AI Shortcut */}
+                <div style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                    borderRadius: 12,
+                    padding: '20px 24px',
+                    marginBottom: 20,
+                    color: '#ffffff',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                        <span style={{ fontSize: 20 }}>✨</span>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>Ask CampusOS about this event</span>
+                    </div>
+                    <button
+                        onClick={() => navigate('/ai', { state: { question: `Tell me more about ${event.title}` } })}
+                        style={{
+                            background: 'rgba(255,255,255,0.15)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: 8,
+                            padding: '10px 18px',
+                            color: '#ffffff',
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            fontWeight: 500,
+                            transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                        }}
+                    >
+                        Open AI Assistant →
+                    </button>
+                </div>
+
                 {/* Organizer/Admin/Faculty Actions */}
                 {!isStudent && (user?.role === 'admin' || user?.role === 'faculty' || event.created_by === user?._id) && (
                     <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -417,9 +476,9 @@ export default function EventDetail() {
                             onClick={() => navigate(`/events/${id}/attendance`)}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                background: '#4c51bf',
                                 border: 'none',
-                                borderRadius: 12,
+                                borderRadius: 10,
                                 padding: '14px 24px',
                                 color: '#fff',
                                 fontSize: 15,
@@ -431,11 +490,16 @@ export default function EventDetail() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: 10,
+                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                             }}
                             onMouseEnter={e => {
-                                e.currentTarget.style.boxShadow = '0 6px 24px rgba(99,102,241,0.4)';
+                                e.currentTarget.style.background = '#434190';
+                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.15)';
                             }}
-                            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                            onMouseLeave={e => { 
+                                e.currentTarget.style.background = '#4c51bf';
+                                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)'; 
+                            }}
                         >
                             <span style={{ fontSize: 18 }}>📋</span>
                             Manage Attendance
@@ -445,11 +509,11 @@ export default function EventDetail() {
                             onClick={() => navigate(`/events/${id}/feedback`)}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-                                border: 'none',
-                                borderRadius: 12,
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 10,
                                 padding: '14px 24px',
-                                color: '#fff',
+                                color: '#1a2332',
                                 fontSize: 15,
                                 fontWeight: 600,
                                 cursor: 'pointer',
@@ -461,9 +525,13 @@ export default function EventDetail() {
                                 gap: 10,
                             }}
                             onMouseEnter={e => {
-                                e.currentTarget.style.boxShadow = '0 6px 24px rgba(139,92,246,0.4)';
+                                e.currentTarget.style.background = '#f7fafc';
+                                e.currentTarget.style.borderColor = '#cbd5e0';
                             }}
-                            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                            onMouseLeave={e => { 
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                            }}
                         >
                             <span style={{ fontSize: 18 }}>💬</span>
                             View Feedback
@@ -475,9 +543,9 @@ export default function EventDetail() {
                     <div style={{ marginBottom: 20 }}>
                         {registerSuccess && (
                             <div style={{
-                                background: 'rgba(34,197,94,0.08)',
-                                border: '1px solid rgba(34,197,94,0.25)',
-                                borderRadius: 14,
+                                background: '#f0fff4',
+                                border: '1px solid #9ae6b4',
+                                borderRadius: 12,
                                 padding: '16px 20px',
                                 marginBottom: 16,
                                 display: 'flex',
@@ -485,7 +553,7 @@ export default function EventDetail() {
                                 gap: 12,
                             }}>
                                 <span style={{ fontSize: 20 }}>✓</span>
-                                <p style={{ fontSize: 14, color: '#22c55e', margin: 0, fontWeight: 500 }}>
+                                <p style={{ fontSize: 14, color: '#38a169', margin: 0, fontWeight: 600 }}>
                                     You're registered for {event.title}!
                                 </p>
                             </div>
@@ -493,9 +561,9 @@ export default function EventDetail() {
 
                         {registerError && (
                             <div style={{
-                                background: 'rgba(239,68,68,0.08)',
-                                border: '1px solid rgba(239,68,68,0.25)',
-                                borderRadius: 14,
+                                background: '#fff5f5',
+                                border: '1px solid #feb2b2',
+                                borderRadius: 12,
                                 padding: '16px 20px',
                                 marginBottom: 16,
                                 display: 'flex',
@@ -503,7 +571,7 @@ export default function EventDetail() {
                                 gap: 12,
                             }}>
                                 <span style={{ fontSize: 20 }}>⚠</span>
-                                <p style={{ fontSize: 14, color: '#f87171', margin: 0 }}>
+                                <p style={{ fontSize: 14, color: '#e53e3e', margin: 0 }}>
                                     {registerError}
                                 </p>
                             </div>
@@ -515,11 +583,9 @@ export default function EventDetail() {
                                 disabled={registering}
                                 style={{
                                     width: '100%',
-                                    background: registering
-                                        ? 'rgba(34,197,94,0.3)'
-                                        : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                    background: registering ? '#9ae6b4' : '#38a169',
                                     border: 'none',
-                                    borderRadius: 12,
+                                    borderRadius: 10,
                                     padding: '14px 24px',
                                     color: '#fff',
                                     fontSize: 15,
@@ -531,11 +597,14 @@ export default function EventDetail() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: 10,
+                                    opacity: registering ? 0.7 : 1,
                                 }}
                                 onMouseEnter={e => {
-                                    if (!registering) e.currentTarget.style.boxShadow = '0 6px 24px rgba(34,197,94,0.4)';
+                                    if (!registering) e.currentTarget.style.background = '#2f855a';
                                 }}
-                                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                                onMouseLeave={e => {
+                                    if (!registering) e.currentTarget.style.background = '#38a169';
+                                }}
                             >
                                 {registering ? (
                                     <>
@@ -562,10 +631,11 @@ export default function EventDetail() {
 
                         {registration && registration.status !== 'cancelled' && (
                             <div style={{
-                                background: '#0c1120',
-                                border: '1px solid rgba(34,197,94,0.25)',
-                                borderRadius: 14,
+                                background: '#ffffff',
+                                border: '1px solid #9ae6b4',
+                                borderRadius: 12,
                                 padding: 20,
+                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                             }}>
                                 <div style={{
                                     display: 'flex',
@@ -577,8 +647,8 @@ export default function EventDetail() {
                                         width: 40,
                                         height: 40,
                                         borderRadius: '50%',
-                                        background: 'rgba(34,197,94,0.15)',
-                                        border: '2px solid rgba(34,197,94,0.3)',
+                                        background: '#f0fff4',
+                                        border: '2px solid #9ae6b4',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -588,12 +658,12 @@ export default function EventDetail() {
                                         <p style={{
                                             fontSize: 15,
                                             fontWeight: 600,
-                                            color: '#22c55e',
+                                            color: '#38a169',
                                             margin: '0 0 2px',
                                         }}>
                                             You're Registered
                                         </p>
-                                        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
+                                        <p style={{ fontSize: 12, color: '#718096', margin: 0 }}>
                                             Registered on {new Date(registration.registration_timestamp).toLocaleDateString('en-US', {
                                                 month: 'short',
                                                 day: 'numeric',
@@ -608,26 +678,24 @@ export default function EventDetail() {
                                     disabled={registering}
                                     style={{
                                         width: '100%',
-                                        background: 'rgba(239,68,68,0.08)',
-                                        border: '1px solid rgba(239,68,68,0.2)',
-                                        borderRadius: 10,
+                                        background: '#ffffff',
+                                        border: '1px solid #feb2b2',
+                                        borderRadius: 8,
                                         padding: '10px 20px',
-                                        color: '#f87171',
+                                        color: '#e53e3e',
                                         fontSize: 13,
-                                        fontWeight: 500,
+                                        fontWeight: 600,
                                         cursor: registering ? 'not-allowed' : 'pointer',
                                         fontFamily: 'inherit',
                                         transition: 'all 0.15s',
                                     }}
                                     onMouseEnter={e => {
                                         if (!registering) {
-                                            e.currentTarget.style.background = 'rgba(239,68,68,0.15)';
-                                            e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)';
+                                            e.currentTarget.style.background = '#fff5f5';
                                         }
                                     }}
                                     onMouseLeave={e => {
-                                        e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
-                                        e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)';
+                                        e.currentTarget.style.background = '#ffffff';
                                     }}
                                 >
                                     {registering ? 'Processing...' : 'Cancel Registration'}
@@ -637,13 +705,13 @@ export default function EventDetail() {
 
                         {event.status === 'cancelled' && (
                             <div style={{
-                                background: 'rgba(239,68,68,0.06)',
-                                border: '1px solid rgba(239,68,68,0.2)',
-                                borderRadius: 14,
+                                background: '#fff5f5',
+                                border: '1px solid #feb2b2',
+                                borderRadius: 12,
                                 padding: 20,
                                 textAlign: 'center',
                             }}>
-                                <p style={{ fontSize: 14, color: '#f87171', margin: 0 }}>
+                                <p style={{ fontSize: 14, color: '#e53e3e', margin: 0 }}>
                                     This event has been cancelled
                                 </p>
                             </div>
@@ -651,13 +719,13 @@ export default function EventDetail() {
 
                         {event.status === 'completed' && !registration && (
                             <div style={{
-                                background: 'rgba(148,163,184,0.06)',
-                                border: '1px solid rgba(148,163,184,0.2)',
-                                borderRadius: 14,
+                                background: '#f7fafc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 12,
                                 padding: 20,
                                 textAlign: 'center',
                             }}>
-                                <p style={{ fontSize: 14, color: '#94a3b8', margin: 0 }}>
+                                <p style={{ fontSize: 14, color: '#718096', margin: 0 }}>
                                     This event has already ended
                                 </p>
                             </div>
@@ -670,9 +738,9 @@ export default function EventDetail() {
                     <div style={{ marginBottom: 20 }}>
                         {feedbackSuccess && (
                             <div style={{
-                                background: 'rgba(139,92,246,0.08)',
-                                border: '1px solid rgba(139,92,246,0.25)',
-                                borderRadius: 14,
+                                background: '#eef2ff',
+                                border: '1px solid #c3dafe',
+                                borderRadius: 12,
                                 padding: '16px 20px',
                                 marginBottom: 16,
                                 display: 'flex',
@@ -680,7 +748,7 @@ export default function EventDetail() {
                                 gap: 12,
                             }}>
                                 <span style={{ fontSize: 20 }}>✓</span>
-                                <p style={{ fontSize: 14, color: '#a78bfa', margin: 0, fontWeight: 500 }}>
+                                <p style={{ fontSize: 14, color: '#4c51bf', margin: 0, fontWeight: 600 }}>
                                     Thank you for your feedback!
                                 </p>
                             </div>
@@ -691,11 +759,11 @@ export default function EventDetail() {
                                 onClick={() => setShowFeedbackForm(true)}
                                 style={{
                                     width: '100%',
-                                    background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-                                    border: 'none',
-                                    borderRadius: 12,
+                                    background: '#ffffff',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: 10,
                                     padding: '14px 24px',
-                                    color: '#fff',
+                                    color: '#1a2332',
                                     fontSize: 15,
                                     fontWeight: 600,
                                     cursor: 'pointer',
@@ -707,18 +775,22 @@ export default function EventDetail() {
                                     gap: 10,
                                 }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(139,92,246,0.4)';
+                                    e.currentTarget.style.background = '#f7fafc';
+                                    e.currentTarget.style.borderColor = '#cbd5e0';
                                 }}
-                                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.background = '#ffffff';
+                                    e.currentTarget.style.borderColor = '#e2e8f0';
+                                }}
                             >
                                 <span style={{ fontSize: 18 }}>💬</span>
                                 Give Feedback
                             </button>
                         ) : (
                             <div style={{
-                                background: '#0c1120',
-                                border: '1px solid rgba(139,92,246,0.25)',
-                                borderRadius: 14,
+                                background: '#ffffff',
+                                border: '1px solid #c3dafe',
+                                borderRadius: 12,
                                 padding: 20,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -728,8 +800,8 @@ export default function EventDetail() {
                                     width: 40,
                                     height: 40,
                                     borderRadius: '50%',
-                                    background: 'rgba(139,92,246,0.15)',
-                                    border: '2px solid rgba(139,92,246,0.3)',
+                                    background: '#eef2ff',
+                                    border: '2px solid #c3dafe',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -738,7 +810,7 @@ export default function EventDetail() {
                                 <p style={{
                                     fontSize: 15,
                                     fontWeight: 600,
-                                    color: '#a78bfa',
+                                    color: '#4c51bf',
                                     margin: 0,
                                 }}>
                                     Feedback Submitted

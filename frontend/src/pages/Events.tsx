@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { eventsApi, type EventResponse } from '../api/events';
 
 const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-    scheduled: { bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.25)', text: '#60a5fa' },
-    ongoing: { bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.25)', text: '#22c55e' },
-    completed: { bg: 'rgba(148,163,184,0.08)', border: 'rgba(148,163,184,0.25)', text: '#94a3b8' },
-    cancelled: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', text: '#ef4444' },
+    scheduled: { bg: '#eef2ff', border: '#c3dafe', text: '#4c51bf' },
+    ongoing: { bg: '#f0fff4', border: '#9ae6b4', text: '#38a169' },
+    completed: { bg: '#f7fafc', border: '#e2e8f0', text: '#718096' },
+    cancelled: { bg: '#fff5f5', border: '#feb2b2', text: '#e53e3e' },
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -24,7 +24,6 @@ const AI_SUGGESTIONS = [
     'What technical events are happening this month?',
     'Which events have the highest participation?',
     'Find hackathons and competitions',
-    'Show me cultural events',
 ];
 
 function StatusBadge({ status }: { status: string }) {
@@ -34,11 +33,11 @@ function StatusBadge({ status }: { status: string }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 5,
-            padding: '2px 10px',
-            borderRadius: 999,
+            padding: '4px 10px',
+            borderRadius: 6,
             fontSize: 11,
             fontWeight: 600,
-            letterSpacing: '0.05em',
+            letterSpacing: '0.03em',
             textTransform: 'uppercase',
             background: config.bg,
             border: `1px solid ${config.border}`,
@@ -75,9 +74,9 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
         <button
             onClick={onClick}
             style={{
-                background: '#0c1120',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 14,
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
                 padding: 0,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -85,60 +84,61 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
                 width: '100%',
                 transition: 'all 0.2s ease',
                 overflow: 'hidden',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
             }}
             onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+                e.currentTarget.style.borderColor = '#cbd5e0';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
             }}
             onMouseLeave={e => {
                 e.currentTarget.style.transform = '';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                e.currentTarget.style.boxShadow = '';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.05)';
             }}
         >
             {/* Header with icon and status */}
             <div style={{
-                padding: '16px 18px',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                padding: '18px 20px',
+                borderBottom: '1px solid #edf2f7',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12,
             }}>
-                <span style={{ fontSize: 24, lineHeight: 1 }}>{icon}</span>
+                <span style={{ fontSize: 28, lineHeight: 1 }}>{icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{
-                        fontSize: 16,
-                        fontWeight: 600,
-                        color: '#f1f5f9',
-                        margin: '0 0 4px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                    }}>
-                        {event.title}
-                    </h3>
                     <p style={{
-                        fontSize: 12,
-                        color: '#64748b',
-                        margin: 0,
+                        fontSize: 11,
+                        color: '#718096',
+                        margin: '0 0 6px',
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         fontWeight: 600,
                     }}>
                         {event.category}
                     </p>
+                    <h3 style={{
+                        fontSize: 17,
+                        fontWeight: 600,
+                        color: '#1a2332',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {event.title}
+                    </h3>
                 </div>
                 <StatusBadge status={event.status} />
             </div>
 
             {/* Content */}
-            <div style={{ padding: '16px 18px' }}>
+            <div style={{ padding: '18px 20px' }}>
                 <p style={{
-                    fontSize: 13,
-                    color: '#94a3b8',
+                    fontSize: 14,
+                    color: '#4a5568',
                     lineHeight: 1.6,
-                    margin: '0 0 14px',
+                    margin: '0 0 16px',
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
@@ -148,21 +148,22 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
                 </p>
 
                 {/* Meta info */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 14, color: '#475569' }}>📅</span>
-                        <span style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                        <span style={{ fontSize: 16, color: '#718096' }}>📅</span>
+                        <span style={{ fontSize: 14, color: '#1a2332', fontWeight: 500 }}>
                             {formatDate(startDate)}
                         </span>
                         {isUpcoming && (
                             <span style={{
                                 fontSize: 10,
-                                fontWeight: 700,
-                                letterSpacing: '0.05em',
+                                fontWeight: 600,
+                                letterSpacing: '0.03em',
                                 textTransform: 'uppercase',
-                                color: '#22c55e',
-                                background: 'rgba(34,197,94,0.1)',
-                                padding: '2px 6px',
+                                color: '#38a169',
+                                background: '#f0fff4',
+                                border: '1px solid #9ae6b4',
+                                padding: '2px 8px',
                                 borderRadius: 4,
                             }}>
                                 Upcoming
@@ -171,24 +172,24 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 14, color: '#475569' }}>🕐</span>
-                        <span style={{ fontSize: 13, color: '#94a3b8' }}>
-                            {formatTime(startDate)} - {formatTime(endDate)}
+                        <span style={{ fontSize: 16, color: '#718096' }}>🕐</span>
+                        <span style={{ fontSize: 13, color: '#4a5568' }}>
+                            {formatTime(startDate)} – {formatTime(endDate)}
                         </span>
                     </div>
 
                     {event.venue_id && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 14, color: '#475569' }}>📍</span>
-                            <span style={{ fontSize: 13, color: '#94a3b8' }}>
+                            <span style={{ fontSize: 16, color: '#718096' }}>📍</span>
+                            <span style={{ fontSize: 13, color: '#4a5568' }}>
                                 Venue assigned
                             </span>
                         </div>
                     )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 14, color: '#475569' }}>👥</span>
-                        <span style={{ fontSize: 13, color: '#94a3b8' }}>
+                        <span style={{ fontSize: 16, color: '#718096' }}>👥</span>
+                        <span style={{ fontSize: 13, color: '#4a5568' }}>
                             {event.expected_participants} expected participants
                         </span>
                     </div>
@@ -198,29 +199,31 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
             {/* Footer */}
             {event.target_audience.length > 0 && (
                 <div style={{
-                    padding: '12px 18px',
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    padding: '14px 20px',
+                    borderTop: '1px solid #edf2f7',
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: 6,
+                    gap: 8,
+                    background: '#f8f9fb',
                 }}>
                     {event.target_audience.slice(0, 3).map((audience, i) => (
                         <span key={i} style={{
-                            fontSize: 11,
-                            color: '#818cf8',
-                            background: 'rgba(99,102,241,0.08)',
-                            border: '1px solid rgba(99,102,241,0.15)',
-                            padding: '2px 8px',
+                            fontSize: 12,
+                            color: '#4c51bf',
+                            background: '#eef2ff',
+                            border: '1px solid #c3dafe',
+                            padding: '4px 10px',
                             borderRadius: 6,
+                            fontWeight: 500,
                         }}>
                             {audience}
                         </span>
                     ))}
                     {event.target_audience.length > 3 && (
                         <span style={{
-                            fontSize: 11,
-                            color: '#64748b',
-                            padding: '2px 8px',
+                            fontSize: 12,
+                            color: '#718096',
+                            padding: '4px 10px',
                         }}>
                             +{event.target_audience.length - 3} more
                         </span>
@@ -234,18 +237,18 @@ function EventCard({ event, onClick }: { event: EventResponse; onClick: () => vo
 function LoadingSkeleton() {
     return (
         <div style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
-            <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+            <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
             {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 14,
-                    padding: 18,
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 12,
+                    padding: 20,
                     marginBottom: 16,
                 }}>
-                    <div style={{ height: 20, width: '70%', background: 'rgba(255,255,255,0.06)', borderRadius: 6, marginBottom: 12 }} />
-                    <div style={{ height: 14, width: '100%', background: 'rgba(255,255,255,0.04)', borderRadius: 4, marginBottom: 8 }} />
-                    <div style={{ height: 14, width: '90%', background: 'rgba(255,255,255,0.04)', borderRadius: 4 }} />
+                    <div style={{ height: 20, width: '70%', background: '#edf2f7', borderRadius: 6, marginBottom: 12 }} />
+                    <div style={{ height: 14, width: '100%', background: '#f7fafc', borderRadius: 4, marginBottom: 8 }} />
+                    <div style={{ height: 14, width: '90%', background: '#f7fafc', borderRadius: 4 }} />
                 </div>
             ))}
         </div>
@@ -287,83 +290,68 @@ export default function Events() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#080c18',
-            color: '#e2e8f0',
-            fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-            padding: '40px 40px 80px',
+            background: '#f8f9fb',
+            color: '#1a2332',
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+            padding: '32px',
         }}>
             <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
             <div style={{ maxWidth: 1200, margin: '0 auto' }}>
                 {/* Header */}
-                <div style={{ marginBottom: 40, animation: 'fadeIn 0.4s ease' }}>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        background: 'rgba(99,102,241,0.1)',
-                        border: '1px solid rgba(99,102,241,0.2)',
-                        borderRadius: 999,
-                        padding: '3px 12px',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: '0.07em',
-                        textTransform: 'uppercase',
-                        color: '#818cf8',
-                        marginBottom: 12,
-                    }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#818cf8', display: 'inline-block' }} />
-                        Campus Events
-                    </div>
+                <div style={{ marginBottom: 32, animation: 'fadeIn 0.4s ease' }}>
                     <h1 style={{
-                        fontSize: 'clamp(28px, 4vw, 40px)',
-                        fontWeight: 700,
-                        letterSpacing: '-0.03em',
-                        color: '#f1f5f9',
-                        margin: '0 0 12px',
+                        fontSize: 32,
+                        fontWeight: 600,
+                        letterSpacing: '-0.02em',
+                        color: '#1a2332',
+                        margin: '0 0 8px',
                     }}>
                         Discover Campus
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: 16, margin: '0 0 20px', maxWidth: 600 }}>
+                    <p style={{ color: '#4a5568', fontSize: 15, margin: '0 0 20px', maxWidth: 600 }}>
                         Explore events, activities, and opportunities happening across campus.
                     </p>
 
                     {/* AI Shortcuts */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        <span style={{ fontSize: 13, color: '#475569', fontWeight: 500, display: 'flex', alignItems: 'center', paddingRight: 8 }}>
-                            Ask CampusOS:
-                        </span>
-                        {AI_SUGGESTIONS.map((q, i) => (
-                            <button
-                                key={i}
-                                onClick={() => navigate('/ai', { state: { question: q } })}
-                                style={{
-                                    background: 'rgba(99,102,241,0.06)',
-                                    border: '1px solid rgba(99,102,241,0.15)',
-                                    borderRadius: 8,
-                                    padding: '6px 12px',
-                                    color: '#818cf8',
-                                    fontSize: 12,
-                                    cursor: 'pointer',
-                                    fontFamily: 'inherit',
-                                    transition: 'all 0.15s',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 6,
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.background = 'rgba(99,102,241,0.12)';
-                                    e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.background = 'rgba(99,102,241,0.06)';
-                                    e.currentTarget.style.borderColor = 'rgba(99,102,241,0.15)';
-                                }}
-                            >
-                                <span style={{ fontSize: 11 }}>✦</span>
-                                {q}
-                            </button>
-                        ))}
+                    <div style={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        borderRadius: 12,
+                        padding: '20px 24px',
+                        marginTop: 20,
+                        color: '#ffffff',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                            <span style={{ fontSize: 18 }}>✨</span>
+                            <span style={{ fontSize: 14, fontWeight: 600 }}>Ask CampusOS</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {AI_SUGGESTIONS.map((q, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => navigate('/ai', { state: { question: q } })}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.15)',
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        borderRadius: 8,
+                                        padding: '8px 14px',
+                                        color: '#ffffff',
+                                        fontSize: 13,
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                                    }}
+                                >
+                                    {q}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -371,22 +359,22 @@ export default function Events() {
                 <div style={{
                     display: 'flex',
                     gap: 12,
-                    marginBottom: 28,
+                    marginBottom: 24,
                     flexWrap: 'wrap',
                     animation: 'fadeIn 0.4s ease 0.1s both',
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <label style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Category:</label>
+                        <label style={{ fontSize: 14, color: '#4a5568', fontWeight: 500 }}>Category:</label>
                         <select
                             value={categoryFilter}
                             onChange={e => setCategoryFilter(e.target.value)}
                             style={{
-                                background: '#0c1120',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: 9,
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 8,
                                 padding: '8px 12px',
-                                color: '#f1f5f9',
-                                fontSize: 13,
+                                color: '#1a2332',
+                                fontSize: 14,
                                 fontFamily: 'inherit',
                                 cursor: 'pointer',
                             }}
@@ -399,17 +387,17 @@ export default function Events() {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <label style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Status:</label>
+                        <label style={{ fontSize: 14, color: '#4a5568', fontWeight: 500 }}>Status:</label>
                         <select
                             value={statusFilter}
                             onChange={e => setStatusFilter(e.target.value)}
                             style={{
-                                background: '#0c1120',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: 9,
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 8,
                                 padding: '8px 12px',
-                                color: '#f1f5f9',
-                                fontSize: 13,
+                                color: '#1a2332',
+                                fontSize: 14,
                                 fontFamily: 'inherit',
                                 cursor: 'pointer',
                             }}
@@ -430,14 +418,22 @@ export default function Events() {
                                 setStatusFilter('');
                             }}
                             style={{
-                                background: 'rgba(239,68,68,0.08)',
-                                border: '1px solid rgba(239,68,68,0.2)',
+                                background: '#ffffff',
+                                border: '1px solid #feb2b2',
                                 borderRadius: 8,
-                                padding: '6px 12px',
-                                color: '#f87171',
-                                fontSize: 12,
+                                padding: '8px 16px',
+                                color: '#e53e3e',
+                                fontSize: 13,
                                 cursor: 'pointer',
                                 fontFamily: 'inherit',
+                                fontWeight: 500,
+                                transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = '#fff5f5';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = '#ffffff';
                             }}
                         >
                             Clear Filters
@@ -452,27 +448,34 @@ export default function Events() {
                     </div>
                 ) : error ? (
                     <div style={{
-                        background: 'rgba(239,68,68,0.06)',
-                        border: '1px solid rgba(239,68,68,0.2)',
-                        borderRadius: 16,
+                        background: '#ffffff',
+                        border: '1px solid #feb2b2',
+                        borderRadius: 12,
                         padding: 32,
                         textAlign: 'center',
                         animation: 'fadeIn 0.3s ease',
                     }}>
                         <div style={{ fontSize: 36, marginBottom: 16 }}>⚠️</div>
-                        <p style={{ color: '#f87171', fontSize: 15, marginBottom: 16 }}>{error}</p>
+                        <p style={{ color: '#e53e3e', fontSize: 15, marginBottom: 16 }}>{error}</p>
                         <button
                             onClick={fetchEvents}
                             style={{
-                                background: 'rgba(239,68,68,0.15)',
-                                border: '1px solid rgba(239,68,68,0.3)',
+                                background: '#ffffff',
+                                border: '1px solid #feb2b2',
                                 borderRadius: 8,
-                                padding: '8px 20px',
-                                color: '#f87171',
-                                fontSize: 13,
+                                padding: '10px 24px',
+                                color: '#e53e3e',
+                                fontSize: 14,
                                 fontWeight: 600,
                                 cursor: 'pointer',
                                 fontFamily: 'inherit',
+                                transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = '#fff5f5';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = '#ffffff';
                             }}
                         >
                             Retry
@@ -487,9 +490,9 @@ export default function Events() {
                         <div style={{
                             width: 64,
                             height: 64,
-                            borderRadius: 16,
-                            background: 'rgba(99,102,241,0.08)',
-                            border: '1px solid rgba(99,102,241,0.15)',
+                            borderRadius: 12,
+                            background: '#eef2ff',
+                            border: '1px solid #c3dafe',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -498,10 +501,10 @@ export default function Events() {
                         }}>
                             📅
                         </div>
-                        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#e2e8f0', margin: '0 0 8px' }}>
+                        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1a2332', margin: '0 0 8px' }}>
                             No events found
                         </h2>
-                        <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
+                        <p style={{ color: '#4a5568', fontSize: 14, margin: 0 }}>
                             {categoryFilter || statusFilter
                                 ? 'Try adjusting your filters to see more events.'
                                 : 'Check back later for upcoming campus events.'}
@@ -529,7 +532,7 @@ export default function Events() {
                     <div style={{
                         marginTop: 32,
                         textAlign: 'center',
-                        color: '#475569',
+                        color: '#718096',
                         fontSize: 13,
                     }}>
                         Showing {events.length} {events.length === 1 ? 'event' : 'events'}
