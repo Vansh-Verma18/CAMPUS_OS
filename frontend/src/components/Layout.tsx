@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Calendar, Building2, Ticket, Sparkles, PlusCircle, BookText, BarChart3, Search, LogOut } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 
 interface NavItem {
     path: string;
@@ -440,6 +441,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             AI
                         </span>
                     </div>
+
+                    {/* Notification Bell */}
+                    <NotificationBell />
                 </header>
 
                 {/* Page content */}

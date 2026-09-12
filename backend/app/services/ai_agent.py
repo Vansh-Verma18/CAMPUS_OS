@@ -117,11 +117,22 @@ class AIAgentService:
         q_lower = question.lower()
         return any(kw in q_lower for kw in CONFLICT_KEYWORDS)
 
-    def _build_user_prompt(self, question: str, conflict_hint: str = "") -> str:
-        prompt = f"User question: {question}"
+    def _build_user_prompt(
+        self, question: str, conflict_hint: str = "",
+        conversation_history: list | None = None
+    ) -> str:
+        parts = []
+        # Add conversation history if present
+        if conversation_history:
+            parts.append("## Conversation History")
+            for msg in conversation_history[-6:]:  # last 6 turns max
+                role_label = "User" if msg.role == "user" else "Assistant"
+                parts.append(f"{role_label}: {msg.content}")
+            parts.append("---")
+        parts.append(f"User question: {question}")
         if conflict_hint:
-            prompt += f"\n\nConflict detection note: {conflict_hint}"
-        return prompt
+            parts.append(f"\nConflict detection note: {conflict_hint}")
+        return "\n".join(parts)
 
     def _parse_llm_response(self, raw: str) -> Dict[str, Any]:
         """

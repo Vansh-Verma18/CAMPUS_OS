@@ -19,6 +19,12 @@ class ClaimType(str, Enum):
     INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
 
 
+class ConversationMessage(BaseModel):
+    """A single turn in the conversation history."""
+    role: Literal["user", "assistant"]
+    content: str = Field(..., max_length=4000)
+
+
 class AIQueryRequest(BaseModel):
     """
     Request body for the AI query endpoint.
@@ -29,6 +35,11 @@ class AIQueryRequest(BaseModel):
         min_length=3,
         max_length=2000,
         description="Natural language question about institutional data"
+    )
+    conversation_history: List[ConversationMessage] = Field(
+        default_factory=list,
+        max_length=10,
+        description="Previous conversation turns for context (last 10 messages max)"
     )
 
 
