@@ -4,10 +4,12 @@ import httpx
 API_URL = "http://localhost:8000/api/v1"
 
 async def test_ai():
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         print("\n--- TEST 1: STUDENT RBAC ---")
-        # Login as student
-        resp = await client.post(f"{API_URL}/auth/login", data={"username": "student@campus.edu", "password": "password123"})
+        resp = await client.post(f"{API_URL}/auth/login", json={"email": "student@campus.edu", "password": "password123"})
+        if resp.status_code != 200:
+            print("Login Failed:", resp.text)
+            return
         student_token = resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {student_token}"}
         
@@ -19,7 +21,7 @@ async def test_ai():
         
         print("\n--- TEST 2: ADMIN RBAC ---")
         # Login as admin
-        resp = await client.post(f"{API_URL}/auth/login", data={"username": "admin@campus.edu", "password": "password123"})
+        resp = await client.post(f"{API_URL}/auth/login", json={"email": "admin@campus.edu", "password": "password123"})
         admin_token = resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {admin_token}"}
         
