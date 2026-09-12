@@ -260,7 +260,10 @@ class AIAgentService:
             role=current_user.role,
             evidence_json=evidence_json,
         )
-        user_prompt = self._build_user_prompt(request.question, conflict_hint)
+        user_prompt = self._build_user_prompt(
+            request.question, conflict_hint,
+            conversation_history=request.conversation_history or []
+        )
 
         # Step 5: Call LLM provider
         try:
