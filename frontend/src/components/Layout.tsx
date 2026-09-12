@@ -53,21 +53,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
                 
                 .sidebar-glass {
-                    background: linear-gradient(180deg, #0B1020 0%, #11182B 100%);
+                    background: rgba(255, 255, 255, 0.95);
                     backdrop-filter: blur(24px);
                     -webkit-backdrop-filter: blur(24px);
-                    border-right: 1px solid rgba(39, 48, 74, 0.4);
-                    box-shadow: 12px 0 35px -5px rgba(79, 70, 229, 0.08);
+                    border-right: 1px solid rgba(226, 232, 240, 0.8);
+                    box-shadow: 4px 0 24px -4px rgba(148, 163, 184, 0.12);
                 }
                 
                 .active-nav-glow {
-                    background: linear-gradient(90deg, rgba(79, 70, 229, 0.22) 0%, rgba(124, 58, 237, 0.28) 100%);
-                    box-shadow: 0 0 12px -2px rgba(124, 58, 237, 0.4);
-                    border: 1px solid rgba(99, 102, 241, 0.35);
+                    background: linear-gradient(90deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+                    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+                    border: none;
                 }
                 
                 .nav-item-hover:hover {
-                    background: rgba(99, 102, 241, 0.10);
+                    background: rgba(99, 102, 241, 0.08);
                     transform: translateX(3px);
                 }
                 
@@ -77,12 +77,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 
                 @keyframes pulse-dot {
                     0%, 100% { opacity: 1; }
-                    50% { opacity: 0.3; }
+                    50% { opacity: 0.5; }
                 }
                 
                 @keyframes breathing-glow {
-                    0%, 100% { box-shadow: 0 0 12px -2px rgba(124, 58, 237, 0.4); }
-                    50% { box-shadow: 0 0 16px -1px rgba(124, 58, 237, 0.5); }
+                    0%, 100% { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3); }
+                    50% { box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 0 12px -2px rgba(139, 92, 246, 0.2); }
                 }
                 
                 .active-nav-glow {
@@ -169,11 +169,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #6366F1 0%, #06B6D4 100%)',
+                            background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 0 15px rgba(99, 102, 241, 0.5)',
+                            boxShadow: '0 2px 12px rgba(99, 102, 241, 0.25)',
                         }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                                 <path d="M21 3H3C1.9 3 1 3.9 1 5v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 14H4c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h16c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z"/>
@@ -185,7 +185,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 fontSize: '24px',
                                 fontWeight: 800,
                                 letterSpacing: '-0.02em',
-                                background: 'linear-gradient(90deg, #ffffff 0%, #A5B4FC 50%, #67E8F9 100%)',
+                                background: 'linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
@@ -199,7 +199,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <p style={{
                         fontSize: '11px',
                         fontWeight: 600,
-                        color: 'rgba(168, 177, 197, 0.6)',
+                        color: '#94A3B8',
                         letterSpacing: '0.1em',
                         textTransform: 'uppercase',
                         marginBottom: '16px',
@@ -224,7 +224,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                         gap: '14px',
                                         padding: '10px 16px',
                                         borderRadius: '9999px',
-                                        color: isActive ? '#ffffff' : '#A8B1C5',
+                                        color: isActive ? '#6366F1' : '#64748B',
                                         fontSize: '14px',
                                         fontWeight: isActive ? 600 : 500,
                                         cursor: 'pointer',
@@ -238,7 +238,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     }}
                                 >
                                     <IconComponent size={16} strokeWidth={2.5} style={{
-                                        color: isActive ? '#A78BFA' : '#67E8F9',
+                                        color: isActive ? '#8B5CF6' : '#94A3B8',
                                         flexShrink: 0,
                                     }} />
                                     <span>{item.label}</span>
@@ -251,22 +251,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {/* Bottom Profile Area */}
                 <div style={{
                     padding: '20px',
-                    borderTop: '1px solid rgba(39, 48, 74, 0.5)',
+                    borderTop: '1px solid rgba(226, 232, 240, 0.8)',
                 }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
-                        background: '#111827',
+                        background: '#F8FAFC',
                         padding: '10px',
                         borderRadius: '16px',
-                        border: '1px solid #29344D',
+                        border: '1px solid #E2E8F0',
                     }}>
                         <div style={{
                             width: '36px',
                             height: '36px',
                             borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                            background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -274,7 +274,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             fontWeight: 700,
                             color: '#ffffff',
                             flexShrink: 0,
-                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.25)',
                         }}>
                             {initials}
                         </div>
@@ -283,7 +283,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 <p style={{
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    color: '#ffffff',
+                                    color: '#1E293B',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -294,7 +294,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     width: '8px',
                                     height: '8px',
                                     borderRadius: '50%',
-                                    background: '#34D399',
+                                    background: '#10B981',
                                     animation: 'pulse-dot 2s ease-in-out infinite',
                                     flexShrink: 0,
                                 }} />
@@ -304,7 +304,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 fontWeight: 700,
                                 letterSpacing: '0.08em',
                                 textTransform: 'uppercase',
-                                color: '#A8B1C5',
+                                color: '#64748B',
                             }}>
                                 {user.role}
                             </p>
@@ -319,9 +319,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             borderRadius: '9999px',
                             fontSize: '12px',
                             fontWeight: 600,
-                            color: '#A8B1C5',
-                            border: '1px solid rgba(99, 102, 241, 0.3)',
-                            background: 'rgba(99, 102, 241, 0.08)',
+                            color: '#64748B',
+                            border: '1px solid #E2E8F0',
+                            background: 'transparent',
                             cursor: 'pointer',
                             fontFamily: 'inherit',
                             transition: 'all 0.2s ease',
@@ -333,16 +333,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             gap: '8px',
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.color = '#ffffff';
-                            e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
-                            e.currentTarget.style.background = 'rgba(124, 58, 237, 0.15)';
-                            e.currentTarget.style.boxShadow = '0 0 12px rgba(124, 58, 237, 0.3)';
+                            e.currentTarget.style.color = '#6366F1';
+                            e.currentTarget.style.borderColor = '#8B5CF6';
+                            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
                         }}
                         onMouseLeave={e => {
-                            e.currentTarget.style.color = '#A8B1C5';
-                            e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)';
-                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.color = '#64748B';
+                            e.currentTarget.style.borderColor = '#E2E8F0';
+                            e.currentTarget.style.background = 'transparent';
                         }}
                     >
                         <LogOut size={14} />
