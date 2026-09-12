@@ -212,7 +212,7 @@ class AIRetrievalService:
         # Registration counts by event
         reg_by_event: Dict[str, int] = defaultdict(int)
         for reg in all_registrations:
-            if reg.status == "registered":
+            if reg.status in ["registered", "confirmed"]:
                 event_id = str(reg.event_id) if reg.event_id else "unknown"
                 reg_by_event[event_id] += 1
         enrichment["registration_counts"] = dict(reg_by_event)
@@ -307,7 +307,7 @@ class AIRetrievalService:
         if role in ("organizer", "faculty", "admin"):
             evidence["participation_summary"] = {
                 "total_registrations": len(all_registrations),
-                "confirmed_registrations": len([r for r in all_registrations if r.status == "registered"]),
+                "confirmed_registrations": len([r for r in all_registrations if r.status in ["registered", "confirmed"]]),
                 "total_attendance_records": len(attendance_records),
                 "attended_count": len([a for a in attendance_records if getattr(a, "status", "") == "attended"]),
             }

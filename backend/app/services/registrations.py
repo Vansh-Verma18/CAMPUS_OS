@@ -56,7 +56,9 @@ class RegistrationService(BaseService[RegistrationInDB, RegistrationCreate]):
         return await self.get_all(query={"event_id": event.id}, limit=100)
 
     async def get_my_registrations(self, current_user: UserInDB) -> List[RegistrationInDB]:
-        return await self.get_all(query={"user_id": current_user.id}, limit=100)
+        from bson import ObjectId
+        user_id = ObjectId(str(current_user.id)) if current_user.id else current_user.id
+        return await self.get_all(query={"user_id": user_id}, limit=100)
 
     async def unregister_user(self, event_id: str, current_user: UserInDB) -> bool:
         event = await self.event_repo.get_by_id(event_id)
