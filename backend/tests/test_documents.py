@@ -281,6 +281,7 @@ async def test_rag_retrieval_respects_rbac(setup_db: Any):
     retrieval = AIRetrievalService(
         event_repo=AsyncMock(), club_repo=AsyncMock(), venue_repo=AsyncMock(),
         resource_repo=AsyncMock(), registration_repo=AsyncMock(), expense_repo=AsyncMock(),
+        attendance_repo=AsyncMock(), feedback_repo=AsyncMock(),
         ai_provider=AsyncMock()
     )
     

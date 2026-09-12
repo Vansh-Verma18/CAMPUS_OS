@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { queryAI, ConversationMessage } from '../api/ai';
-import type { AIQueryResponse, AIClaim } from '../api/ai';
+import { queryAI } from '../api/ai';
+import type { AIQueryResponse, AIClaim, ConversationMessage } from '../api/ai';
 import { FileText, CheckCircle2, Sparkles } from 'lucide-react';
 
 const SUGGESTED_QUESTIONS = [
@@ -200,21 +200,14 @@ export default function AIAgent() {
             // Append this turn to conversation history (keep last 10)
             setConversationHistory(prev => [
                 ...prev,
-                { role: 'user', content: query },
-                { role: 'assistant', content: res.answer },
+                { role: 'user' as const, content: query },
+                { role: 'assistant' as const, content: res.answer },
             ].slice(-10));
         } catch (err: any) {
             setError(err.message ?? 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleClearConversation = () => {
-        setConversationHistory([]);
-        setResponse(null);
-        setError(null);
-        setQuestion('');
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

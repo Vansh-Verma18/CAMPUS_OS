@@ -1,4 +1,4 @@
-import { fetchWithAuth, API_BASE_URL } from './client';
+import { fetchWithAuth } from './client';
 
 export interface NotificationItem {
     id: string;

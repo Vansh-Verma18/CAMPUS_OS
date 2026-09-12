@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { notificationsApi, NotificationItem } from '../api/notifications';
+import { notificationsApi, type NotificationItem } from '../api/notifications';
 
 const TYPE_CONFIG = {
     info:    { icon: 'ℹ️', color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },

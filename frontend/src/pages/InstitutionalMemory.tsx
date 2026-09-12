@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { documentApi } from '../api/documents';
 import type { DocumentResponse } from '../api/documents';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Upload, Search, Filter, Sparkles, Calendar, Building2, Shield, Trash2, Clock, CheckCircle } from 'lucide-react';
+import { FileText, Upload, Search, Sparkles, Calendar, Building2, Shield, Trash2, Clock } from 'lucide-react';
 
 export default function InstitutionalMemory() {
     const { user } = useAuth();
@@ -119,6 +119,22 @@ export default function InstitutionalMemory() {
     // Get unique values for filters
     const departments = Array.from(new Set(documents.map(d => d.department).filter(Boolean)));
     const years = Array.from(new Set(documents.map(d => d.year).filter(Boolean))).sort((a, b) => (b || 0) - (a || 0));
+
+    const getAccessColor = (classification: string) => {
+        switch (classification) {
+            case 'PUBLIC': return { bg: 'rgba(16, 185, 129, 0.1)', text: '#10B981', border: 'rgba(16, 185, 129, 0.3)' };
+            case 'ADMIN': return { bg: 'rgba(239, 68, 68, 0.1)', text: '#EF4444', border: 'rgba(239, 68, 68, 0.3)' };
+            default: return { bg: 'rgba(245, 158, 11, 0.1)', text: '#F59E0B', border: 'rgba(245, 158, 11, 0.3)' };
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'vectorized': return '#10B981';
+            case 'failed': return '#EF4444';
+            default: return '#6366F1';
+        }
+    };
 
     return (
         <div style={{
@@ -241,202 +257,791 @@ export default function InstitutionalMemory() {
                     </div>
                 )}
 
-            {canUpload && (
-                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 shadow-xl backdrop-blur-sm">
-                    <h2 className="text-xl font-semibold text-white mb-4">Upload Document</h2>
-                    <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
+                {/* Upload Section */}
+                {canUpload && (
+                    <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: 16,
+                        padding: 28,
+                        marginBottom: 32,
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                        animation: 'fadeInUp 0.6s ease 0.1s both',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                            <div style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 10,
+                                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#ffffff',
+                            }}>
+                                <Upload size={20} />
+                            </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Document Name *</label>
+                                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#1a202c', letterSpacing: '-0.01em' }}>
+                                    Add Institutional Record
+                                </h2>
+                            </div>
+                        </div>
+                        <p style={{ color: '#64748b', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6, fontWeight: 500 }}>
+                            Upload reports, policies, event documents, and other institutional records so CampusOS can use them when answering questions.
+                        </p>
+
+                        <form onSubmit={handleUpload} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+                            {/* Document Name */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Document Name *
+                                </label>
                                 <input
                                     type="text"
                                     required
                                     value={documentName}
                                     onChange={(e) => setDocumentName(e.target.value)}
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="e.g. 2023 Annual Tech Symposium Report"
+                                    placeholder="e.g., 2025 Annual Tech Symposium Report"
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '12px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = '#6366F1';
+                                        e.target.style.background = '#ffffff';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#E2E8F0';
+                                        e.target.style.background = '#F8F9FB';
+                                    }}
                                 />
                             </div>
-                            
+
+                            {/* Department */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">File (PDF or DOCX, max 10MB) *</label>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Department
+                                </label>
+                                <input
+                                    type="text"
+                                    value={department}
+                                    onChange={(e) => setDepartment(e.target.value)}
+                                    placeholder="Optional"
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '12px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = '#6366F1';
+                                        e.target.style.background = '#ffffff';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#E2E8F0';
+                                        e.target.style.background = '#F8F9FB';
+                                    }}
+                                />
+                            </div>
+
+                            {/* Year */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Year
+                                </label>
+                                <input
+                                    type="number"
+                                    value={year}
+                                    onChange={(e) => setYear(e.target.value)}
+                                    placeholder="Optional"
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '12px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = '#6366F1';
+                                        e.target.style.background = '#ffffff';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#E2E8F0';
+                                        e.target.style.background = '#F8F9FB';
+                                    }}
+                                />
+                            </div>
+
+                            {/* Access Classification */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Access Classification *
+                                </label>
+                                <select
+                                    value={accessClassification}
+                                    onChange={(e) => setAccessClassification(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '12px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'pointer',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = '#6366F1';
+                                        e.target.style.background = '#ffffff';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#E2E8F0';
+                                        e.target.style.background = '#F8F9FB';
+                                    }}
+                                >
+                                    <option value="PUBLIC">Public (All Users)</option>
+                                    <option value="CLUB">Club (Organizers & Admins)</option>
+                                    <option value="DEPARTMENT">Department (Faculty & Admins)</option>
+                                    {user?.role === 'admin' && <option value="ADMIN">Admin (Admins Only)</option>}
+                                </select>
+                            </div>
+
+                            {/* File Upload - Full Width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    File (PDF or DOCX, max 10MB) *
+                                </label>
                                 <input
                                     type="file"
                                     required
                                     accept=".pdf,.docx"
                                     onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                    className="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 transition-colors"
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px dashed #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '20px',
+                                        color: '#64748b',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.borderColor = '#6366F1';
+                                        e.currentTarget.style.background = '#ffffff';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.background = '#F8F9FB';
+                                    }}
+                                />
+                                {file && (
+                                    <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6366F1', fontWeight: 600 }}>
+                                        Selected: {file.name} ({formatBytes(file.size)})
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Submit Button - Full Width */}
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <button
+                                    type="submit"
+                                    disabled={uploading || !file || !documentName}
+                                    style={{
+                                        width: '100%',
+                                        background: uploading || !file || !documentName
+                                            ? '#CBD5E1'
+                                            : 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+                                        border: 'none',
+                                        borderRadius: 10,
+                                        padding: '14px 24px',
+                                        color: '#ffffff',
+                                        fontSize: 15,
+                                        fontWeight: 700,
+                                        cursor: uploading || !file || !documentName ? 'not-allowed' : 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 10,
+                                        fontFamily: 'inherit',
+                                        boxShadow: uploading || !file || !documentName ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.3)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!uploading && file && documentName) {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.4)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = '';
+                                        e.currentTarget.style.boxShadow = uploading || !file || !documentName ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.3)';
+                                    }}
+                                >
+                                    {uploading ? (
+                                        <>
+                                            <span style={{
+                                                width: 18,
+                                                height: 18,
+                                                border: '2.5px solid rgba(255,255,255,0.3)',
+                                                borderTopColor: '#fff',
+                                                borderRadius: '50%',
+                                                display: 'inline-block',
+                                                animation: 'spin 0.8s linear infinite',
+                                            }} />
+                                            Processing document...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload size={18} />
+                                            Upload Document
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* Search and Filters */}
+                <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 16,
+                    padding: '20px 24px',
+                    marginBottom: 24,
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                    animation: 'fadeInUp 0.6s ease 0.2s both',
+                }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
+                        {/* Search */}
+                        <div>
+                            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                Search Records
+                            </label>
+                            <div style={{ position: 'relative' }}>
+                                <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search documents..."
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '10px 14px 10px 38px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = '#6366F1';
+                                        e.target.style.background = '#ffffff';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#E2E8F0';
+                                        e.target.style.background = '#F8F9FB';
+                                    }}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Department</label>
-                                    <input
-                                        type="text"
-                                        value={department}
-                                        onChange={(e) => setDepartment(e.target.value)}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="Optional"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Year</label>
-                                    <input
-                                        type="number"
-                                        value={year}
-                                        onChange={(e) => setYear(e.target.value)}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="Optional"
-                                    />
-                                </div>
-                            </div>
-
+                        {/* Department Filter */}
+                        {departments.length > 0 && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Access Classification *</label>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Department
+                                </label>
                                 <select
-                                    value={accessClassification}
-                                    onChange={(e) => setAccessClassification(e.target.value)}
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                    value={filterDept}
+                                    onChange={(e) => setFilterDept(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '10px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        cursor: 'pointer',
+                                    }}
                                 >
-                                    <option value="PUBLIC">Public (All Users)</option>
-                                    <option value="CLUB">Club (Organizers & Admins)</option>
-                                    <option value="DEPARTMENT">Department (Faculty & Admins)</option>
-                                    {user.role === 'admin' && <option value="ADMIN">Admin (Admins Only)</option>}
+                                    <option value="">All Departments</option>
+                                    {departments.map(dept => (
+                                        <option key={dept} value={dept}>{dept}</option>
+                                    ))}
                                 </select>
                             </div>
+                        )}
 
-                            <button
-                                type="submit"
-                                disabled={uploading || !file || !documentName}
-                                className="w-full mt-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        {/* Year Filter */}
+                        {years.length > 0 && (
+                            <div>
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                    Year
+                                </label>
+                                <select
+                                    value={filterYear}
+                                    onChange={(e) => setFilterYear(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: '#F8F9FB',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: 10,
+                                        padding: '10px 14px',
+                                        color: '#1a202c',
+                                        fontSize: 14,
+                                        fontFamily: 'inherit',
+                                        fontWeight: 500,
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="">All Years</option>
+                                    {years.map(yr => (
+                                        <option key={yr} value={yr}>{yr}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Access Filter */}
+                        <div>
+                            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                                Access Level
+                            </label>
+                            <select
+                                value={filterAccess}
+                                onChange={(e) => setFilterAccess(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    background: '#F8F9FB',
+                                    border: '2px solid #E2E8F0',
+                                    borderRadius: 10,
+                                    padding: '10px 14px',
+                                    color: '#1a202c',
+                                    fontSize: 14,
+                                    fontFamily: 'inherit',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                }}
                             >
-                                {uploading ? (
-                                    <>
-                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    'Upload & Index Document'
-                                )}
-                            </button>
+                                <option value="">All Levels</option>
+                                <option value="PUBLIC">Public</option>
+                                <option value="CLUB">Club</option>
+                                <option value="DEPARTMENT">Department</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            )}
 
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl shadow-xl backdrop-blur-sm overflow-hidden">
-                <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-white">Indexed Documents</h2>
-                    <button onClick={fetchDocuments} className="text-sm text-gray-400 hover:text-white transition-colors">
-                        Refresh
+                {/* Knowledge Library */}
+                <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                    animation: 'fadeInUp 0.6s ease 0.3s both',
+                }}>
+                    {/* Header */}
+                    <div style={{
+                        padding: '24px 28px',
+                        borderBottom: '1px solid #F1F5F9',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#1a202c', letterSpacing: '-0.01em' }}>
+                                Knowledge Library
+                            </h2>
+                            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                {filteredDocuments.length} {filteredDocuments.length === 1 ? 'record' : 'records'} available
+                            </p>
+                        </div>
+                        <button
+                            onClick={fetchDocuments}
+                            style={{
+                                background: '#F8F9FB',
+                                border: '1px solid #E2E8F0',
+                                borderRadius: 8,
+                                padding: '8px 16px',
+                                color: '#475569',
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.borderColor = '#6366F1';
+                                e.currentTarget.style.color = '#6366F1';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#F8F9FB';
+                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                e.currentTarget.style.color = '#475569';
+                            }}
+                        >
+                            Refresh
+                        </button>
+                    </div>
+
+                    {/* Content */}
+                    {loading ? (
+                        <div style={{ padding: '80px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                            <div style={{
+                                width: 48,
+                                height: 48,
+                                border: '3px solid #E2E8F0',
+                                borderTopColor: '#6366F1',
+                                borderRadius: '50%',
+                                animation: 'spin 0.8s linear infinite',
+                            }} />
+                            <p style={{ color: '#64748b', fontSize: 14, fontWeight: 500 }}>Loading documents...</p>
+                        </div>
+                    ) : filteredDocuments.length === 0 ? (
+                        <div style={{ padding: '80px 20px', textAlign: 'center' }}>
+                            <div style={{
+                                width: 64,
+                                height: 64,
+                                borderRadius: 16,
+                                background: 'rgba(99, 102, 241, 0.08)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 20px',
+                            }}>
+                                <FileText size={32} style={{ color: '#6366F1' }} />
+                            </div>
+                            <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: '#1a202c' }}>
+                                {searchQuery || filterDept || filterYear || filterAccess ? 'No matching records' : 'No institutional records yet'}
+                            </h3>
+                            <p style={{ color: '#64748b', fontSize: 14, margin: '0 0 24px', maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+                                {searchQuery || filterDept || filterYear || filterAccess 
+                                    ? 'Try adjusting your filters to find what you\'re looking for.'
+                                    : 'Upload reports, policies, and event records to build your campus memory.'
+                                }
+                            </p>
+                            {canUpload && !searchQuery && !filterDept && !filterYear && !filterAccess && (
+                                <button
+                                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                                        border: 'none',
+                                        borderRadius: 10,
+                                        padding: '12px 24px',
+                                        color: '#ffffff',
+                                        fontSize: 14,
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = '';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                                    }}
+                                >
+                                    <Upload size={16} />
+                                    Upload Document
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '0 0 20px' }}>
+                            {filteredDocuments.map((doc, index) => {
+                                const accessColor = getAccessColor(doc.access_classification);
+                                const statusColor = getStatusColor(doc.processing_status);
+                                
+                                return (
+                                    <div
+                                        key={doc._id}
+                                        style={{
+                                            padding: '20px 28px',
+                                            borderBottom: index < filteredDocuments.length - 1 ? '1px solid #F1F5F9' : 'none',
+                                            transition: 'all 0.2s ease',
+                                            cursor: 'default',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = '#F8F9FB';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'transparent';
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                                            {/* Icon */}
+                                            <div style={{
+                                                width: 48,
+                                                height: 48,
+                                                borderRadius: 12,
+                                                background: 'rgba(99, 102, 241, 0.08)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                            }}>
+                                                <FileText size={24} style={{ color: '#6366F1' }} />
+                                            </div>
+
+                                            {/* Content */}
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                {/* Title */}
+                                                <h3 style={{
+                                                    margin: '0 0 8px',
+                                                    fontSize: 16,
+                                                    fontWeight: 700,
+                                                    color: '#1a202c',
+                                                    letterSpacing: '-0.01em',
+                                                }}>
+                                                    {doc.document_name}
+                                                </h3>
+
+                                                {/* Metadata */}
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', marginBottom: 12 }}>
+                                                    {doc.department && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                                            <Building2 size={14} />
+                                                            {doc.department}
+                                                        </div>
+                                                    )}
+                                                    {doc.year && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                                            <Calendar size={14} />
+                                                            {doc.year}
+                                                        </div>
+                                                    )}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                                        <FileText size={14} />
+                                                        {doc.document_type.toUpperCase()} • {formatBytes(doc.file_size_bytes)}
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                                        <Clock size={14} />
+                                                        {formatDate(doc.upload_timestamp)}
+                                                    </div>
+                                                </div>
+
+                                                {/* Badges */}
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                                                    {/* Access Badge */}
+                                                    <div style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 6,
+                                                        padding: '4px 12px',
+                                                        borderRadius: 9999,
+                                                        background: accessColor.bg,
+                                                        border: `1px solid ${accessColor.border}`,
+                                                        fontSize: 12,
+                                                        fontWeight: 600,
+                                                        color: accessColor.text,
+                                                    }}>
+                                                        <Shield size={12} />
+                                                        {doc.access_classification}
+                                                    </div>
+
+                                                    {/* Status Badge */}
+                                                    <div style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 6,
+                                                        padding: '4px 12px',
+                                                        borderRadius: 9999,
+                                                        background: 'rgba(148, 163, 184, 0.1)',
+                                                        border: '1px solid rgba(148, 163, 184, 0.2)',
+                                                        fontSize: 12,
+                                                        fontWeight: 600,
+                                                        color: '#64748b',
+                                                    }}>
+                                                        <span style={{
+                                                            width: 8,
+                                                            height: 8,
+                                                            borderRadius: '50%',
+                                                            background: statusColor,
+                                                            animation: doc.processing_status === 'processing' ? 'pulse-slow 2s ease-in-out infinite' : 'none',
+                                                        }} />
+                                                        {doc.processing_status === 'vectorized' ? 'Ready' : doc.processing_status}
+                                                        {doc.processing_status === 'vectorized' && ` • ${doc.chunk_count} chunks`}
+                                                    </div>
+                                                </div>
+
+                                                {/* Actions */}
+                                                <div style={{ display: 'flex', gap: 12 }}>
+                                                    {doc.processing_status === 'vectorized' && (
+                                                        <button
+                                                            onClick={() => navigate('/ai', { state: { question: `Summarize the document: ${doc.document_name}` } })}
+                                                            style={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: 6,
+                                                                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                                                                border: 'none',
+                                                                borderRadius: 8,
+                                                                padding: '8px 16px',
+                                                                color: '#ffffff',
+                                                                fontSize: 13,
+                                                                fontWeight: 600,
+                                                                cursor: 'pointer',
+                                                                fontFamily: 'inherit',
+                                                                transition: 'all 0.2s ease',
+                                                                boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.4)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.transform = '';
+                                                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.3)';
+                                                            }}
+                                                        >
+                                                            <Sparkles size={14} />
+                                                            Ask AI
+                                                        </button>
+                                                    )}
+                                                    {(user?.role === 'admin' || user?._id === doc.uploaded_by) && (
+                                                        <button
+                                                            onClick={() => handleDelete(doc._id)}
+                                                            style={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: 6,
+                                                                background: 'transparent',
+                                                                border: '1px solid #FCA5A5',
+                                                                borderRadius: 8,
+                                                                padding: '8px 16px',
+                                                                color: '#EF4444',
+                                                                fontSize: 13,
+                                                                fontWeight: 600,
+                                                                cursor: 'pointer',
+                                                                fontFamily: 'inherit',
+                                                                transition: 'all 0.2s ease',
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)';
+                                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.background = 'transparent';
+                                                                e.currentTarget.style.transform = '';
+                                                            }}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Delete
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* AI Connection Card */}
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                    borderRadius: 16,
+                    padding: 28,
+                    marginTop: 32,
+                    animation: 'fadeInUp 0.6s ease 0.4s both',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <div style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 10,
+                            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#ffffff',
+                        }}>
+                            <Sparkles size={20} />
+                        </div>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1a202c', letterSpacing: '-0.01em' }}>
+                            Use your institutional memory
+                        </h3>
+                    </div>
+                    <p style={{ color: '#64748b', fontSize: 14, margin: '0 0 20px', lineHeight: 1.6, fontWeight: 500 }}>
+                        Ask CampusOS questions that require historical or document-based knowledge.
+                    </p>
+                    <button
+                        onClick={() => navigate('/ai')}
+                        style={{
+                            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                            border: 'none',
+                            borderRadius: 10,
+                            padding: '12px 24px',
+                            color: '#ffffff',
+                            fontSize: 14,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = '';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                        }}
+                    >
+                        <Sparkles size={16} />
+                        Ask CampusOS
                     </button>
                 </div>
-                
-                {loading ? (
-                    <div className="p-12 flex justify-center">
-                        <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                    </div>
-                ) : documents.length === 0 ? (
-                    <div className="p-12 text-center text-gray-400">
-                        No documents found matching your access level.
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-300">
-                            <thead className="bg-slate-900/50 text-gray-400 uppercase">
-                                <tr>
-                                    <th className="px-6 py-4 font-medium">Document</th>
-                                    <th className="px-6 py-4 font-medium">Classification</th>
-                                    <th className="px-6 py-4 font-medium">Size</th>
-                                    <th className="px-6 py-4 font-medium">Status</th>
-                                    <th className="px-6 py-4 font-medium text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-700/50">
-                                {documents.map((doc) => (
-                                    <tr key={doc._id} className="hover:bg-slate-700/20 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-white">{doc.document_name}</div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {doc.document_type.toUpperCase()} • {doc.year || 'No year'} • {doc.department || 'No dept'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                                                doc.access_classification === 'PUBLIC' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                doc.access_classification === 'ADMIN' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                            }`}>
-                                                {doc.access_classification}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-400">
-                                            {formatBytes(doc.file_size_bytes)}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="flex items-center gap-1.5">
-                                                <span className={`w-2 h-2 rounded-full ${
-                                                    doc.processing_status === 'vectorized' ? 'bg-green-500' : 
-                                                    doc.processing_status === 'failed' ? 'bg-red-500' : 
-                                                    'bg-blue-500 animate-pulse'
-                                                }`} />
-                                                <span className="capitalize">{doc.processing_status}</span>
-                                            </span>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {doc.chunk_count} chunks
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12 }}>
-                                                {doc.processing_status === 'vectorized' && (
-                                                    <button
-                                                        onClick={() => navigate('/ai', { state: { question: `Summarize the document: ${doc.document_name}` } })}
-                                                        style={{
-                                                            background: 'rgba(99,102,241,0.1)',
-                                                            border: '1px solid rgba(99,102,241,0.2)',
-                                                            color: '#818cf8',
-                                                            padding: '4px 10px',
-                                                            borderRadius: 6,
-                                                            fontSize: 12,
-                                                            fontWeight: 500,
-                                                            cursor: 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 4,
-                                                            transition: 'all 0.15s',
-                                                        }}
-                                                        onMouseEnter={e => {
-                                                            e.currentTarget.style.background = 'rgba(99,102,241,0.2)';
-                                                        }}
-                                                        onMouseLeave={e => {
-                                                            e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
-                                                        }}
-                                                    >
-                                                        <span>✦</span> Ask AI
-                                                    </button>
-                                                )}
-                                                {(user?.role === 'admin' || user?._id === doc.uploaded_by) && (
-                                                    <button 
-                                                        onClick={() => handleDelete(doc._id)}
-                                                        className="text-red-400 hover:text-red-300 transition-colors"
-                                                        title="Delete document"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
             </div>
         </div>
     );
