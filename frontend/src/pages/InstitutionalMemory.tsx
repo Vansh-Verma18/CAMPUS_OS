@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { documentApi } from '../api/documents';
 import type { DocumentResponse } from '../api/documents';
 import { useAuth } from '../context/AuthContext';
+import { FileText, Upload, Search, Filter, Sparkles, Calendar, Building2, Shield, Trash2, Clock, CheckCircle } from 'lucide-react';
 
 export default function InstitutionalMemory() {
     const { user } = useAuth();
@@ -11,6 +12,10 @@ export default function InstitutionalMemory() {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterDept, setFilterDept] = useState('');
+    const [filterYear, setFilterYear] = useState('');
+    const [filterAccess, setFilterAccess] = useState('');
 
     // Form state
     const [file, setFile] = useState<File | null>(null);
@@ -95,54 +100,146 @@ export default function InstitutionalMemory() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
+    const formatDate = (timestamp: string) => {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    };
+
+    // Filter documents
+    const filteredDocuments = documents.filter(doc => {
+        const matchesSearch = !searchQuery || 
+            doc.document_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (doc.department?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+        const matchesDept = !filterDept || doc.department === filterDept;
+        const matchesYear = !filterYear || doc.year?.toString() === filterYear;
+        const matchesAccess = !filterAccess || doc.access_classification === filterAccess;
+        return matchesSearch && matchesDept && matchesYear && matchesAccess;
+    });
+
+    // Get unique values for filters
+    const departments = Array.from(new Set(documents.map(d => d.department).filter(Boolean)));
+    const years = Array.from(new Set(documents.map(d => d.year).filter(Boolean))).sort((a, b) => (b || 0) - (a || 0));
+
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#080c18',
-            color: '#e2e8f0',
-            padding: '40px 40px 80px',
-            fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-            maxWidth: 1200,
-            margin: '0 auto',
-            animation: 'fadeIn 0.5s ease',
+            background: '#F8F9FB',
+            color: '#1a202c',
+            padding: '40px 24px 80px',
+            fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         }}>
-            <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(16px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                
+                @keyframes pulse-slow {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+                
+                @media (prefers-reduced-motion: reduce) {
+                    * {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                    }
+                }
+            `}</style>
             
-            <div style={{ marginBottom: 40 }}>
-                <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    background: 'rgba(99,102,241,0.1)',
-                    border: '1px solid rgba(99,102,241,0.2)',
-                    borderRadius: 999,
-                    padding: '3px 12px',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: '0.07em',
-                    textTransform: 'uppercase',
-                    color: '#818cf8',
-                    marginBottom: 12,
-                }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#818cf8', display: 'inline-block' }} />
-                    Knowledge Base
-                </div>
-                <h1 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, letterSpacing: '-0.02em', color: '#f1f5f9', margin: '0 0 8px' }}>
-                    Institutional Memory
-                </h1>
-                <p style={{ color: '#475569', fontSize: 15, margin: 0, maxWidth: 500 }}>
-                    Manage the documents that power CampusOS intelligence.
-                </p>
-            </div>
+            <div style={{ maxWidth: 1200, margin: '0 auto', animation: 'fadeIn 0.5s ease' }}>
+                {/* Header */}
+                <header style={{ marginBottom: 40, animation: 'fadeInUp 0.6s ease' }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        background: 'rgba(79, 70, 229, 0.08)',
+                        border: '1px solid rgba(79, 70, 229, 0.2)',
+                        borderRadius: 999,
+                        padding: '6px 14px',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: '#4F46E5',
+                        marginBottom: 16,
+                    }}>
+                        <FileText size={12} />
+                        Knowledge Base
+                    </div>
+                    <h1 style={{ 
+                        fontSize: 'clamp(32px, 5vw, 48px)', 
+                        fontWeight: 800, 
+                        letterSpacing: '-0.03em', 
+                        color: '#1a202c', 
+                        margin: '0 0 12px',
+                        lineHeight: 1.1,
+                    }}>
+                        Institutional Memory
+                    </h1>
+                    <p style={{ color: '#64748b', fontSize: 16, margin: '0 0 12px', maxWidth: 650, lineHeight: 1.6, fontWeight: 500 }}>
+                        Explore the knowledge your institution has collected over time.
+                    </p>
+                    <p style={{ color: '#94A3B8', fontSize: 14, margin: 0, fontWeight: 500 }}>
+                        CampusOS makes institutional knowledge searchable and useful.
+                    </p>
+                </header>
 
-            {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg flex items-center gap-3">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {error}
-                </div>
-            )}
+                {/* Error Message */}
+                {error && (
+                    <div style={{
+                        background: 'rgba(239, 68, 68, 0.05)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        borderRadius: 12,
+                        padding: '16px 20px',
+                        marginBottom: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        animation: 'fadeInUp 0.4s ease',
+                    }}>
+                        <div style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 8,
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            fontSize: 18,
+                        }}>
+                            ⚠
+                        </div>
+                        <p style={{ margin: 0, color: '#DC2626', fontSize: 14, fontWeight: 500, flex: 1 }}>{error}</p>
+                        <button
+                            onClick={() => setError(null)}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#DC2626',
+                                cursor: 'pointer',
+                                padding: 4,
+                                fontSize: 18,
+                                lineHeight: 1,
+                            }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
 
             {canUpload && (
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 shadow-xl backdrop-blur-sm">

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { queryAI } from '../api/ai';
+import { queryAI, ConversationMessage } from '../api/ai';
 import type { AIQueryResponse, AIClaim } from '../api/ai';
 import { FileText, CheckCircle2, Sparkles } from 'lucide-react';
 
@@ -170,6 +170,7 @@ export default function AIAgent() {
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState<AIQueryResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const responseRef = useRef<HTMLDivElement>(null);
 
@@ -194,13 +195,26 @@ export default function AIAgent() {
         setError(null);
         setResponse(null);
         try {
-            const res = await queryAI(query);
+            const res = await queryAI(query, conversationHistory);
             setResponse(res);
+            // Append this turn to conversation history (keep last 10)
+            setConversationHistory(prev => [
+                ...prev,
+                { role: 'user', content: query },
+                { role: 'assistant', content: res.answer },
+            ].slice(-10));
         } catch (err: any) {
             setError(err.message ?? 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleClearConversation = () => {
+        setConversationHistory([]);
+        setResponse(null);
+        setError(null);
+        setQuestion('');
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

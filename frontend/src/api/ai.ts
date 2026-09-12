@@ -15,11 +15,19 @@ export interface AIQueryResponse {
     role_context?: string | null;
 }
 
-export async function queryAI(question: string): Promise<AIQueryResponse> {
+export interface ConversationMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
+export async function queryAI(
+    question: string,
+    conversation_history: ConversationMessage[] = []
+): Promise<AIQueryResponse> {
     const res = await fetchWithAuth('/ai/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, conversation_history }),
     });
 
     if (res.status === 503) {
