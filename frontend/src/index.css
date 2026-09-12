@@ -5,58 +5,49 @@
 }
 
 @layer base {
-  /* Premium University Design System */
+  /* CampusOS Premium Design System V2 */
   :root {
-    /* Colors - Warm whites and deep navy */
+    /* Premium color palette */
     --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fb;
-    --bg-tertiary: #f1f3f7;
+    --bg-secondary: #fafbfc;
+    --bg-tertiary: #f5f7fa;
     
-    --text-primary: #1a2332;
-    --text-secondary: #4a5568;
-    --text-tertiary: #718096;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
     
-    /* Indigo accent - used sparingly */
-    --accent-primary: #4c51bf;
-    --accent-hover: #434190;
+    /* Rich indigo primary */
+    --accent-primary: #4f46e5;
+    --accent-hover: #4338ca;
     --accent-light: #eef2ff;
-    --accent-border: #c3dafe;
+    --accent-border: #c7d2fe;
     
-    /* Status colors */
-    --status-success: #38a169;
-    --status-warning: #d69e2e;
-    --status-error: #e53e3e;
-    --status-info: #3182ce;
+    /* Electric blue secondary */
+    --accent-secondary: #3b82f6;
+    --accent-secondary-light: #dbeafe;
     
-    /* Borders and shadows */
+    /* Status colors - soft and sophisticated */
+    --status-success: #10b981;
+    --status-success-light: #d1fae5;
+    --status-warning: #f59e0b;
+    --status-warning-light: #fef3c7;
+    --status-error: #ef4444;
+    --status-error-light: #fee2e2;
+    --status-info: #3b82f6;
+    
+    /* Sophisticated shadows */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    
+    /* Borders */
     --border-color: #e2e8f0;
-    --border-light: #edf2f7;
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --border-light: #f1f5f9;
     
-    /* Typography */
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-base: 1rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
-    
-    /* Spacing */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    
-    /* Border radius */
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
+    /* Typography - Modern sans-serif stack */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
 
   * {
@@ -71,12 +62,13 @@
     font-family: var(--font-family);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
   
-  /* Scrollbar styling */
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
   
   ::-webkit-scrollbar-track {
@@ -84,23 +76,110 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
+    background: #94a3b8;
+    background-clip: padding-box;
   }
   
-  /* Simple fade-in animation */
+  /* Animation system */
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes rotateGlow {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  /* Ambient background animation */
+  @keyframes ambient-move {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -30px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }

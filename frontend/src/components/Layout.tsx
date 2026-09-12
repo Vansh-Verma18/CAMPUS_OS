@@ -1,37 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, Calendar, Building2, Ticket, Sparkles, PlusCircle, BookText, BarChart3, Menu, X, Search, Command } from 'lucide-react';
 
 const ROLE_COLOR: Record<string, string> = {
-    admin: '#4c51bf',
-    faculty: '#3182ce',
-    organizer: '#38a169',
-    student: '#d69e2e',
+    admin: '#4f46e5',
+    faculty: '#3b82f6',
+    organizer: '#10b981',
+    student: '#f59e0b',
 };
 
 const ROLE_BG: Record<string, string> = {
     admin: '#eef2ff',
-    faculty: '#ebf8ff',
-    organizer: '#f0fff4',
-    student: '#fffaf0',
+    faculty: '#dbeafe',
+    organizer: '#d1fae5',
+    student: '#fef3c7',
 };
 
 interface NavItem {
     path: string;
     label: string;
-    icon: string;
+    icon: any;
     roles?: string[]; // undefined = all roles
 }
 
 const NAV_ITEMS: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: '⊞' },
-    { path: '/events', label: 'Events', icon: '📅' },
-    { path: '/clubs', label: 'Clubs', icon: '🏛️' },
-    { path: '/my-registrations', label: 'My Registrations', icon: '🎟️', roles: ['student'] },
-    { path: '/ai', label: 'AI Agent', icon: '✦' },
-    { path: '/event-planner', label: 'Event Planner', icon: '⊕', roles: ['admin', 'faculty', 'organizer'] },
-    { path: '/institutional-memory', label: 'Knowledge Base', icon: '⊗', roles: ['admin', 'faculty', 'organizer'] },
-    { path: '/analytics', label: 'Analytics', icon: '◈', roles: ['admin', 'faculty'] },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/events', label: 'Events', icon: Calendar },
+    { path: '/clubs', label: 'Clubs', icon: Building2 },
+    { path: '/my-registrations', label: 'My Registrations', icon: Ticket, roles: ['student'] },
+    { path: '/ai', label: 'AI Agent', icon: Sparkles },
+    { path: '/event-planner', label: 'Event Planner', icon: PlusCircle, roles: ['admin', 'faculty', 'organizer'] },
+    { path: '/institutional-memory', label: 'Knowledge Base', icon: BookText, roles: ['admin', 'faculty', 'organizer'] },
+    { path: '/analytics', label: 'Analytics', icon: BarChart3, roles: ['admin', 'faculty'] },
 ];
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -39,7 +40,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
-    const [searchFocused, setSearchFocused] = useState(false);
 
     if (!user) return null;
 
@@ -47,8 +47,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         item => !item.roles || item.roles.includes(user.role)
     );
 
-    const roleColor = ROLE_COLOR[user.role] ?? '#4a5568';
-    const roleBg = ROLE_BG[user.role] ?? '#f7fafc';
+    const roleColor = ROLE_COLOR[user.role] ?? '#64748b';
+    const roleBg = ROLE_BG[user.role] ?? '#f1f5f9';
     const initials = user.display_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
     // Get current page title
@@ -58,57 +58,73 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#f8f9fb',
+            background: '#fafbfc',
             display: 'flex',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
-            color: '#1a2332',
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+            color: '#0f172a',
         }}>
-            {/* Sidebar */}
+            {/* Premium Sidebar */}
             <aside style={{
-                width: collapsed ? 72 : 260,
+                width: collapsed ? 80 : 280,
                 minHeight: '100vh',
                 background: '#ffffff',
                 borderRight: '1px solid #e2e8f0',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'width 0.2s ease',
+                transition: 'width 0.3s ease',
                 flexShrink: 0,
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
                 overflow: 'hidden',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
             }}>
                 {/* Logo */}
                 <div style={{
-                    padding: collapsed ? '24px 16px' : '24px',
-                    borderBottom: '1px solid #edf2f7',
+                    padding: collapsed ? '28px 20px' : '28px 24px',
+                    borderBottom: '1px solid #f1f5f9',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
+                    gap: 14,
                     justifyContent: collapsed ? 'center' : 'space-between',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}
                         onClick={() => navigate('/dashboard')}>
+                        {/* Premium logo icon */}
                         <div style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 8,
-                            background: '#4c51bf',
+                            width: 42,
+                            height: 42,
+                            borderRadius: 12,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: 18,
+                            fontSize: 20,
                             flexShrink: 0,
                             color: '#ffffff',
-                        }}>🎓</div>
+                            boxShadow: '0 4px 6px -1px rgba(102, 126, 234, 0.4)',
+                        }}>
+                            🎓
+                        </div>
                         {!collapsed && (
-                            <span style={{
-                                fontWeight: 600,
-                                fontSize: 18,
-                                color: '#1a2332',
-                                letterSpacing: '-0.01em',
-                                whiteSpace: 'nowrap',
-                            }}>CampusOS</span>
+                            <div>
+                                <div style={{
+                                    fontWeight: 700,
+                                    fontSize: 20,
+                                    color: '#0f172a',
+                                    letterSpacing: '-0.02em',
+                                    whiteSpace: 'nowrap',
+                                    lineHeight: 1,
+                                    marginBottom: 4,
+                                }}>CampusOS</div>
+                                <div style={{
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    color: '#64748b',
+                                    letterSpacing: '0.05em',
+                                    textTransform: 'uppercase',
+                                }}>Campus Intelligence</div>
+                            </div>
                         )}
                     </div>
                     {!collapsed && (
@@ -117,53 +133,82 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             style={{
                                 background: 'none',
                                 border: 'none',
-                                color: '#718096',
+                                color: '#94a3b8',
                                 cursor: 'pointer',
-                                fontSize: 18,
-                                padding: 4,
-                                borderRadius: 4,
+                                padding: 6,
+                                borderRadius: 6,
                                 lineHeight: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
                             }}
                             title="Collapse sidebar"
-                        >←</button>
-                    )}
-                    {collapsed && (
-                        <button
-                            onClick={() => setCollapsed(false)}
-                            style={{
-                                position: 'absolute',
-                                left: '50%',
-                                bottom: 80,
-                                transform: 'translateX(-50%)',
-                                background: '#ffffff',
-                                border: '1px solid #e2e8f0',
-                                color: '#718096',
-                                cursor: 'pointer',
-                                fontSize: 14,
-                                padding: '6px 8px',
-                                borderRadius: 6,
-                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = '#f8fafc';
+                                e.currentTarget.style.color = '#64748b';
                             }}
-                            title="Expand sidebar"
-                        >→</button>
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = 'none';
+                                e.currentTarget.style.color = '#94a3b8';
+                            }}
+                        >
+                            <X size={18} />
+                        </button>
                     )}
                 </div>
 
+                {/* Expand button (when collapsed) */}
+                {collapsed && (
+                    <button
+                        onClick={() => setCollapsed(false)}
+                        style={{
+                            position: 'absolute',
+                            bottom: 100,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                        }}
+                        title="Expand sidebar"
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = '#f8fafc';
+                            e.currentTarget.style.color = '#4f46e5';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = '#ffffff';
+                            e.currentTarget.style.color = '#64748b';
+                        }}
+                    >
+                        <Menu size={18} />
+                    </button>
+                )}
+
                 {/* Nav */}
-                <nav style={{ flex: 1, padding: '16px 12px', overflow: 'auto' }}>
+                <nav style={{ flex: 1, padding: '20px 16px', overflow: 'auto' }}>
                     {!collapsed && (
                         <p style={{
                             fontSize: 11,
-                            fontWeight: 600,
-                            color: '#718096',
-                            letterSpacing: '0.05em',
+                            fontWeight: 700,
+                            color: '#94a3b8',
+                            letterSpacing: '0.08em',
                             textTransform: 'uppercase',
                             padding: '0 12px',
-                            marginBottom: 12,
+                            marginBottom: 16,
                         }}>Navigation</p>
                     )}
                     {visibleNav.map(item => {
                         const isActive = location.pathname === item.path;
+                        const IconComponent = item.icon;
                         return (
                             <button
                                 key={item.path}
@@ -173,35 +218,64 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: collapsed ? 0 : 12,
+                                    gap: collapsed ? 0 : 14,
                                     justifyContent: collapsed ? 'center' : 'flex-start',
-                                    padding: collapsed ? '12px 0' : '10px 12px',
-                                    borderRadius: 8,
+                                    padding: collapsed ? '14px 0' : '12px 14px',
+                                    borderRadius: 10,
                                     border: 'none',
                                     cursor: 'pointer',
-                                    fontSize: 14,
-                                    fontWeight: isActive ? 600 : 400,
+                                    fontSize: 15,
+                                    fontWeight: isActive ? 600 : 500,
                                     fontFamily: 'inherit',
-                                    color: isActive ? '#4c51bf' : '#4a5568',
+                                    color: isActive ? '#4f46e5' : '#475569',
                                     background: isActive ? '#eef2ff' : 'transparent',
                                     marginBottom: 4,
-                                    transition: 'all 0.15s ease',
+                                    transition: 'all 0.2s ease',
                                     textAlign: 'left',
+                                    position: 'relative',
+                                    boxShadow: isActive ? '0 1px 3px 0 rgba(79, 70, 229, 0.1)' : 'none',
                                 }}
                                 onMouseEnter={e => {
                                     if (!isActive) {
-                                        e.currentTarget.style.background = '#f7fafc';
-                                        e.currentTarget.style.color = '#1a2332';
+                                        e.currentTarget.style.background = '#f8fafc';
+                                        e.currentTarget.style.color = '#0f172a';
                                     }
+                                    const icon = e.currentTarget.querySelector('.nav-icon') as HTMLElement;
+                                    if (icon) icon.style.transform = 'translateX(2px)';
                                 }}
                                 onMouseLeave={e => {
                                     if (!isActive) {
                                         e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#4a5568';
+                                        e.currentTarget.style.color = '#475569';
                                     }
+                                    const icon = e.currentTarget.querySelector('.nav-icon') as HTMLElement;
+                                    if (icon) icon.style.transform = '';
                                 }}
                             >
-                                <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{item.icon}</span>
+                                {isActive && !collapsed && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: 3,
+                                        height: '60%',
+                                        background: '#4f46e5',
+                                        borderRadius: '0 4px 4px 0',
+                                    }} />
+                                )}
+                                <span
+                                    className="nav-icon"
+                                    style={{
+                                        lineHeight: 1,
+                                        flexShrink: 0,
+                                        transition: 'transform 0.2s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <IconComponent size={20} strokeWidth={2.5} />
+                                </span>
                                 {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
                             </button>
                         );
@@ -210,48 +284,50 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
                 {/* User card */}
                 <div style={{
-                    padding: collapsed ? '16px 12px' : '16px',
-                    borderTop: '1px solid #edf2f7',
+                    padding: collapsed ? '20px 16px' : '20px',
+                    borderTop: '1px solid #f1f5f9',
                 }}>
                     {!collapsed ? (
                         <div style={{
                             background: roleBg,
-                            border: `1px solid ${roleColor}33`,
-                            borderRadius: 10,
-                            padding: '12px',
+                            border: `1px solid ${roleColor}22`,
+                            borderRadius: 12,
+                            padding: '16px',
+                            transition: 'all 0.2s',
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                                 <div style={{
-                                    width: 36,
-                                    height: 36,
+                                    width: 42,
+                                    height: 42,
                                     borderRadius: '50%',
                                     background: roleColor,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: 13,
-                                    fontWeight: 600,
+                                    fontSize: 14,
+                                    fontWeight: 700,
                                     color: '#ffffff',
                                     flexShrink: 0,
+                                    boxShadow: `0 2px 8px ${roleColor}40`,
                                 }}>{initials}</div>
                                 <div style={{ overflow: 'hidden', flex: 1 }}>
-                                    <p style={{ 
-                                        fontSize: 14, 
-                                        fontWeight: 600, 
-                                        color: '#1a2332', 
-                                        whiteSpace: 'nowrap', 
-                                        overflow: 'hidden', 
+                                    <p style={{
+                                        fontSize: 15,
+                                        fontWeight: 600,
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
                                         textOverflow: 'ellipsis',
-                                        marginBottom: 2,
+                                        marginBottom: 4,
                                     }}>
                                         {user.display_name}
                                     </p>
-                                    <p style={{ 
-                                        fontSize: 11, 
-                                        fontWeight: 600, 
-                                        letterSpacing: '0.03em', 
-                                        textTransform: 'uppercase', 
-                                        color: roleColor 
+                                    <p style={{
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        letterSpacing: '0.05em',
+                                        textTransform: 'uppercase',
+                                        color: roleColor,
                                     }}>
                                         {user.role}
                                     </p>
@@ -263,22 +339,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     width: '100%',
                                     background: '#ffffff',
                                     border: '1px solid #e2e8f0',
-                                    color: '#4a5568',
-                                    padding: '8px 0',
-                                    borderRadius: 6,
-                                    fontSize: 13,
-                                    fontWeight: 500,
+                                    color: '#475569',
+                                    padding: '10px 0',
+                                    borderRadius: 8,
+                                    fontSize: 14,
+                                    fontWeight: 600,
                                     cursor: 'pointer',
                                     fontFamily: 'inherit',
-                                    transition: 'all 0.15s',
+                                    transition: 'all 0.2s',
                                 }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#1a2332';
-                                    e.currentTarget.style.background = '#f7fafc';
-                                    e.currentTarget.style.borderColor = '#cbd5e0';
+                                    e.currentTarget.style.color = '#0f172a';
+                                    e.currentTarget.style.background = '#f8fafc';
+                                    e.currentTarget.style.borderColor = '#cbd5e1';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.color = '#4a5568';
+                                    e.currentTarget.style.color = '#475569';
                                     e.currentTarget.style.background = '#ffffff';
                                     e.currentTarget.style.borderColor = '#e2e8f0';
                                 }}
@@ -292,11 +368,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                 width: '100%',
                                 background: 'none',
                                 border: 'none',
-                                color: '#718096',
+                                color: '#94a3b8',
                                 cursor: 'pointer',
-                                fontSize: 18,
+                                fontSize: 20,
                                 padding: '8px 0',
                                 textAlign: 'center',
+                                transition: 'color 0.2s',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.color = '#64748b';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.color = '#94a3b8';
                             }}
                         >↩</button>
                     )}
@@ -305,7 +388,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {/* Main content area with top header */}
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                {/* Top header */}
+                {/* Premium Top Header */}
                 <header style={{
                     background: '#ffffff',
                     borderBottom: '1px solid #e2e8f0',
@@ -313,59 +396,72 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: 24,
+                    gap: 32,
                     position: 'sticky',
                     top: 0,
                     zIndex: 10,
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
                 }}>
                     {/* Breadcrumb / Page title */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 18, color: '#1a2332', fontWeight: 600 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{
+                            fontSize: 20,
+                            color: '#0f172a',
+                            fontWeight: 700,
+                            letterSpacing: '-0.01em',
+                        }}>
                             {pageTitle}
                         </span>
                     </div>
 
-                    {/* Search bar - "Ask CampusOS" */}
-                    <div style={{ flex: 1, maxWidth: 480 }}>
+                    {/* AI Search Command Bar */}
+                    <div style={{ flex: 1, maxWidth: 560 }}>
                         <button
                             onClick={() => navigate('/ai')}
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
                             style={{
                                 width: '100%',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 10,
-                                padding: '10px 16px',
-                                background: '#f8f9fb',
-                                border: searchFocused ? '1px solid #4c51bf' : '1px solid #e2e8f0',
-                                borderRadius: 8,
-                                fontSize: 14,
-                                color: '#718096',
+                                gap: 12,
+                                padding: '12px 18px',
+                                background: '#fafbfc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 12,
+                                fontSize: 15,
+                                color: '#64748b',
                                 cursor: 'pointer',
                                 fontFamily: 'inherit',
-                                transition: 'all 0.15s',
+                                transition: 'all 0.2s',
                                 textAlign: 'left',
                             }}
                             onMouseEnter={e => {
-                                if (!searchFocused) e.currentTarget.style.borderColor = '#cbd5e0';
+                                e.currentTarget.style.borderColor = '#c7d2fe';
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                             }}
                             onMouseLeave={e => {
-                                if (!searchFocused) e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.background = '#fafbfc';
+                                e.currentTarget.style.boxShadow = '';
                             }}
                         >
-                            <span style={{ fontSize: 16 }}>🔍</span>
-                            <span>Ask CampusOS anything...</span>
-                            <span style={{ 
-                                marginLeft: 'auto', 
-                                fontSize: 11, 
-                                background: '#ffffff', 
-                                padding: '2px 8px', 
-                                borderRadius: 4,
+                            <Search size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                            <span style={{ flex: 1 }}>Ask CampusOS...</span>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                background: '#ffffff',
+                                padding: '4px 10px',
+                                borderRadius: 6,
                                 border: '1px solid #e2e8f0',
-                                color: '#4a5568',
-                                fontWeight: 500,
-                            }}>AI</span>
+                                color: '#64748b',
+                            }}>
+                                <Command size={12} />
+                                <span>K</span>
+                            </div>
                         </button>
                     </div>
                 </header>
