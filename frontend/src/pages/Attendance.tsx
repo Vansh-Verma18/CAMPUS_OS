@@ -4,6 +4,31 @@ import { eventsApi, type EventResponse } from '../api/events';
 import { registrationsApi, type RegistrationResponse } from '../api/registrations';
 import { attendanceApi, type AttendanceResponse } from '../api/attendance';
 
+// Animated counter hook
+function useCounter(end: number, duration: number = 1000, delay: number = 0) {
+    const [count, setCount] = useState(0);
+    
+    useEffect(() => {
+        const startTime = Date.now() + delay;
+        const timer = setInterval(() => {
+            const now = Date.now();
+            const progress = Math.min((now - startTime) / duration, 1);
+            
+            if (progress < 0) return;
+            
+            setCount(Math.floor(progress * end));
+            
+            if (progress >= 1) {
+                clearInterval(timer);
+            }
+        }, 16);
+        
+        return () => clearInterval(timer);
+    }, [end, duration, delay]);
+    
+    return count;
+}
+
 export default function Attendance() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -14,13 +39,23 @@ export default function Attendance() {
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [checkingIn, setCheckingIn] = useState<string | null>(null); // user_id being checked in
+    const [checkingIn, setCheckingIn] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'checked' | 'not-checked'>('all');
+    const [animateMetrics, setAnimateMetrics] = useState(false);
 
     useEffect(() => {
         if (id) {
             loadData();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (!loading && event) {
+            // Trigger animation after data loads
+            setTimeout(() => setAnimateMetrics(true), 100);
+        }
+    }, [loading, event]);
 
     const loadData = async () => {
         if (!id) return;
@@ -29,7 +64,6 @@ export default function Attendance() {
             setLoading(true);
             setError(null);
 
-            // Load event, registrations, and attendance in parallel
             const [eventData, registrationsData, attendanceData] = await Promise.all([
                 eventsApi.getEvent(id),
                 registrationsApi.getEventRegistrations(id),
@@ -55,20 +89,17 @@ export default function Attendance() {
     const handleCheckIn = async (userId: string) => {
         if (!id || checkingIn) return;
 
-        // Check if already attended
         if (attendance.some(a => a.user_id === userId)) {
-            return; // Already checked in
+            return;
         }
 
         try {
             setCheckingIn(userId);
             const newAttendance = await attendanceApi.recordAttendance(id, { user_id: userId });
-            
-            // Update attendance list
             setAttendance(prev => [...prev, newAttendance]);
         } catch (err: any) {
             const errorMsg = err.response?.data?.detail || 'Failed to record attendance';
-            alert(errorMsg); // Simple error feedback
+            alert(errorMsg);
         } finally {
             setCheckingIn(null);
         }
@@ -85,84 +116,55 @@ export default function Attendance() {
         });
     };
 
-    const getAttendanceStatus = (userId: string) => {
-        return attendance.find(a => a.user_id === userId);
-    };
-
     const attendanceCount = attendance.length;
     const totalRegistrations = registrations.length;
     const attendanceRate = totalRegistrations > 0 
-        ? ((attendanceCount / totalRegistrations) * 100).toFixed(1) 
-        : '0';
-
-    const S = {
-        page: {
-            minHeight: '100vh',
-            background: '#080c18',
-            color: '#e2e8f0',
-            padding: '40px',
-            fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-        },
-        section: {
-            background: '#0c1120',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 14,
-            padding: '28px 32px',
-            marginBottom: 20,
-        },
-        statCard: {
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 10,
-            padding: '20px',
-            flex: 1,
-            minWidth: 160,
-        },
-        participantRow: {
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: 10,
-            padding: '14px 18px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-        },
-        checkInButton: {
-            background: 'rgba(34,211,153,0.15)',
-            border: '1px solid rgba(34,211,153,0.3)',
-            borderRadius: 8,
-            padding: '7px 14px',
-            color: '#34d399',
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            whiteSpace: 'nowrap' as const,
-        },
-    };
+        ? parseFloat(((attendanceCount / totalRegistrations) * 100).toFixed(1))
+        : 0;
+    
+    // Use counters for animation
+    const animatedTotal = useCounter(animateMetrics ? totalRegistrations : 0, 800, 0);
+    const animatedCheckedIn = useCounter(animateMetrics ? attendanceCount : 0, 800, 150);
+    const animatedRate = useCounter(animateMetrics ? attendanceRate : 0, 800, 300);
+    
+    // Filter registrations
+    const filteredRegistrations = registrations.filter(reg => {
+        const matchesSearch = searchQuery === '' || 
+            reg.user_id.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const isCheckedIn = attendance.some(a => a.user_id === reg.user_id);
+        const matchesStatus = 
+            filterStatus === 'all' ||
+            (filterStatus === 'checked' && isCheckedIn) ||
+            (filterStatus === 'not-checked' && !isCheckedIn);
+        
+        return matchesSearch && matchesStatus;
+    });
 
     if (loading) {
         return (
-            <div style={S.page}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 400,
-                    gap: 12,
-                }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#f8f9fb',
+                color: '#1a2332',
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <div style={{ textAlign: 'center' }}>
                     <div style={{
-                        width: 40,
-                        height: 40,
-                        border: '3px solid rgba(99,102,241,0.2)',
-                        borderTopColor: '#6366f1',
+                        width: 48,
+                        height: 48,
+                        border: '3px solid #edf2f7',
+                        borderTopColor: '#4c51bf',
                         borderRadius: '50%',
+                        display: 'inline-block',
                         animation: 'spin 0.8s linear infinite',
+                        marginBottom: 16,
                     }} />
-                    <p style={{ color: '#64748b', fontSize: 14 }}>Loading attendance...</p>
                     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                    <p style={{ color: '#4a5568', fontSize: 14 }}>Loading attendance...</p>
                 </div>
             </div>
         );
@@ -170,47 +172,45 @@ export default function Attendance() {
 
     if (error || !event) {
         return (
-            <div style={S.page}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 400,
-                    textAlign: 'center',
-                    padding: 40,
-                }}>
-                    <div style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 16,
-                        background: 'rgba(239,68,68,0.08)',
-                        border: '1px solid rgba(239,68,68,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 28,
-                        marginBottom: 16,
-                    }}>🚫</div>
-                    <h2 style={{ fontSize: 18, fontWeight: 600, color: '#f87171', margin: '0 0 8px' }}>
-                        {error || 'Event not found'}
+            <div style={{
+                minHeight: '100vh',
+                background: '#f8f9fb',
+                color: '#1a2332',
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <div style={{ textAlign: 'center', maxWidth: 400 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🚫</div>
+                    <h2 style={{ fontSize: 20, fontWeight: 600, color: '#1a2332', margin: '0 0 8px' }}>
+                        {error?.includes('not authorized') ? 'Access Denied' : 'Event Not Found'}
                     </h2>
+                    <p style={{ color: '#4a5568', fontSize: 14, marginBottom: 24 }}>
+                        {error || 'The event you are looking for does not exist.'}
+                    </p>
                     <button
                         onClick={() => navigate(`/events/${id}`)}
                         style={{
-                            marginTop: 16,
-                            background: 'rgba(99,102,241,0.15)',
-                            border: '1px solid rgba(99,102,241,0.3)',
+                            background: '#4c51bf',
+                            border: 'none',
                             borderRadius: 8,
-                            padding: '8px 16px',
-                            color: '#818cf8',
-                            fontSize: 13,
+                            padding: '12px 24px',
+                            color: '#fff',
+                            fontSize: 14,
                             fontWeight: 600,
                             cursor: 'pointer',
                             fontFamily: 'inherit',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = '#434190';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = '#4c51bf';
                         }}
                     >
-                        Back to Event
+                        ← Back to Event
                     </button>
                 </div>
             </div>
@@ -218,198 +218,430 @@ export default function Attendance() {
     }
 
     return (
-        <div style={S.page}>
-            <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <div style={{
+            minHeight: '100vh',
+            background: '#f8f9fb',
+            color: '#1a2332',
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+            padding: '32px',
+        }}>
+            <style>{`
+                @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+                @keyframes spin{to{transform:rotate(360deg)}}
+                @media (prefers-reduced-motion: reduce) {
+                    * {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                    }
+                }
+            `}</style>
+            
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                {/* Back button */}
+                <button
+                    onClick={() => navigate(`/events/${id}`)}
+                    style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 8,
+                        padding: '10px 16px',
+                        color: '#4a5568',
+                        fontSize: 14,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        marginBottom: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        fontWeight: 500,
+                        transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                        e.currentTarget.style.background = '#f7fafc';
+                        e.currentTarget.style.borderColor = '#cbd5e0';
+                    }}
+                    onMouseLeave={e => {
+                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                    }}
+                >
+                    ← Back to Event
+                </button>
 
-            {/* Back button */}
-            <button
-                onClick={() => navigate(`/events/${id}`)}
-                style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 8,
-                    padding: '8px 14px',
-                    color: '#94a3b8',
-                    fontSize: 13,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    marginBottom: 24,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                }}
-                onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                    e.currentTarget.style.color = '#e2e8f0';
-                }}
-                onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                    e.currentTarget.style.color = '#94a3b8';
-                }}
-            >
-                ← Back to Event
-            </button>
-
-            {/* Header */}
-            <div style={S.section}>
+                {/* Event Summary Header */}
                 <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    background: 'rgba(99,102,241,0.1)',
-                    border: '1px solid rgba(99,102,241,0.2)',
-                    borderRadius: 999,
-                    padding: '3px 12px',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: '#818cf8',
-                    marginBottom: 12,
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 12,
+                    padding: '24px 28px',
+                    marginBottom: 20,
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
                 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#818cf8' }} />
-                    Attendance Management
-                </div>
-                <h1 style={{
-                    fontSize: 28,
-                    fontWeight: 700,
-                    letterSpacing: '-0.02em',
-                    color: '#f1f5f9',
-                    margin: '0 0 8px',
-                }}>
-                    {event.title}
-                </h1>
-                <p style={{ fontSize: 14, color: '#64748b', margin: 0 }}>
-                    {formatDate(event.start_datetime)}
-                </p>
-            </div>
-
-            {/* Statistics */}
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
-                <div style={S.statCard}>
-                    <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
-                        Total Registrations
-                    </p>
-                    <p style={{ fontSize: 32, fontWeight: 700, color: '#f1f5f9', margin: 0, letterSpacing: '-0.02em' }}>
-                        {totalRegistrations}
-                    </p>
-                </div>
-
-                <div style={S.statCard}>
-                    <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
-                        Checked In
-                    </p>
-                    <p style={{ fontSize: 32, fontWeight: 700, color: '#34d399', margin: 0, letterSpacing: '-0.02em' }}>
-                        {attendanceCount}
-                    </p>
-                </div>
-
-                <div style={S.statCard}>
-                    <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
-                        Attendance Rate
-                    </p>
-                    <p style={{ fontSize: 32, fontWeight: 700, color: '#818cf8', margin: 0, letterSpacing: '-0.02em' }}>
-                        {attendanceRate}%
-                    </p>
-                </div>
-            </div>
-
-            {/* Participants List */}
-            <div style={S.section}>
-                <h2 style={{
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: '#f1f5f9',
-                    margin: '0 0 20px',
-                }}>
-                    Registered Participants
-                </h2>
-
-                {registrations.length === 0 && (
-                    <div style={{
-                        padding: '40px',
-                        textAlign: 'center',
-                        background: 'rgba(255,255,255,0.02)',
-                        borderRadius: 10,
-                        border: '1px solid rgba(255,255,255,0.05)',
+                    <h1 style={{
+                        fontSize: 24,
+                        fontWeight: 600,
+                        letterSpacing: '-0.01em',
+                        color: '#1a2332',
+                        margin: '0 0 6px',
                     }}>
-                        <div style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: 12,
-                            background: 'rgba(148,163,184,0.08)',
-                            border: '1px solid rgba(148,163,184,0.15)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 22,
-                            margin: '0 auto 12px',
-                        }}>👥</div>
-                        <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
-                            No registrations yet for this event.
+                        Manage Attendance
+                    </h1>
+                    <p style={{ fontSize: 14, color: '#4a5568', margin: '0 0 16px' }}>
+                        Track participation for this event
+                    </p>
+                    <div style={{
+                        paddingTop: 16,
+                        borderTop: '1px solid #e2e8f0',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '20px',
+                        fontSize: 14,
+                        color: '#4a5568',
+                    }}>
+                        <div>
+                            <span style={{ fontWeight: 600, color: '#1a2332' }}>{event.title}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span>📅</span>
+                            {formatDate(event.start_datetime)}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Statistics Cards */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: 16,
+                    marginBottom: 20,
+                }}>
+                    <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        padding: 24,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                        animation: 'fadeIn 0.4s ease',
+                    }}>
+                        <p style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            color: '#718096',
+                            margin: '0 0 8px',
+                        }}>
+                            Total Registrations
+                        </p>
+                        <p style={{
+                            fontSize: 36,
+                            fontWeight: 700,
+                            color: '#1a2332',
+                            margin: 0,
+                            letterSpacing: '-0.02em',
+                        }}>
+                            {animatedTotal}
                         </p>
                     </div>
-                )}
 
-                {registrations.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        {registrations.map(reg => {
-                            const attendanceRecord = getAttendanceStatus(reg.user_id);
-                            const isAttended = !!attendanceRecord;
-                            const isCheckingInThis = checkingIn === reg.user_id;
-
-                            return (
-                                <div key={reg._id} style={S.participantRow}>
-                                    <div style={{ flex: 1 }}>
-                                        <p style={{ fontSize: 14, fontWeight: 500, color: '#e2e8f0', margin: '0 0 4px' }}>
-                                            User ID: {reg.user_id.substring(0, 8)}...
-                                        </p>
-                                        <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
-                                            Registered: {formatDate(reg.registration_timestamp)}
-                                        </p>
-                                    </div>
-
-                                    {isAttended ? (
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            padding: '7px 14px',
-                                            borderRadius: 8,
-                                            background: 'rgba(34,211,153,0.1)',
-                                            border: '1px solid rgba(34,211,153,0.2)',
-                                        }}>
-                                            <span style={{ fontSize: 14 }}>✓</span>
-                                            <span style={{ fontSize: 12, fontWeight: 600, color: '#34d399' }}>
-                                                Checked In
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleCheckIn(reg.user_id)}
-                                            disabled={isCheckingInThis}
-                                            style={{
-                                                ...S.checkInButton,
-                                                opacity: isCheckingInThis ? 0.5 : 1,
-                                                cursor: isCheckingInThis ? 'not-allowed' : 'pointer',
-                                            }}
-                                            onMouseEnter={e => {
-                                                if (!isCheckingInThis) {
-                                                    e.currentTarget.style.background = 'rgba(34,211,153,0.25)';
-                                                }
-                                            }}
-                                            onMouseLeave={e => {
-                                                e.currentTarget.style.background = 'rgba(34,211,153,0.15)';
-                                            }}
-                                        >
-                                            {isCheckingInThis ? 'Checking In...' : 'Check In'}
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
+                    <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #d1fae5',
+                        borderRadius: 12,
+                        padding: 24,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                        animation: 'fadeIn 0.4s ease 0.1s',
+                        animationFillMode: 'both',
+                    }}>
+                        <p style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            color: '#047857',
+                            margin: '0 0 8px',
+                        }}>
+                            Checked In
+                        </p>
+                        <p style={{
+                            fontSize: 36,
+                            fontWeight: 700,
+                            color: '#059669',
+                            margin: 0,
+                            letterSpacing: '-0.02em',
+                        }}>
+                            {animatedCheckedIn}
+                        </p>
                     </div>
-                )}
+
+                    <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #e0e7ff',
+                        borderRadius: 12,
+                        padding: 24,
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                        animation: 'fadeIn 0.4s ease 0.2s',
+                        animationFillMode: 'both',
+                    }}>
+                        <p style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            color: '#4338ca',
+                            margin: '0 0 8px',
+                        }}>
+                            Attendance Rate
+                        </p>
+                        <p style={{
+                            fontSize: 36,
+                            fontWeight: 700,
+                            color: '#4c51bf',
+                            margin: 0,
+                            letterSpacing: '-0.02em',
+                        }}>
+                            {animatedRate}%
+                        </p>
+                    </div>
+                </div>
+
+                {/* Participants List */}
+                <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 12,
+                    padding: '24px 28px',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 16,
+                        marginBottom: 20,
+                    }}>
+                        <h2 style={{
+                            fontSize: 18,
+                            fontWeight: 600,
+                            color: '#1a2332',
+                            margin: 0,
+                        }}>
+                            Registered Participants ({registrations.length})
+                        </h2>
+
+                        {/* Search & Filter */}
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                            <input
+                                type="text"
+                                placeholder="Search by user ID..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                style={{
+                                    background: '#f7fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: 8,
+                                    padding: '8px 12px',
+                                    fontSize: 14,
+                                    color: '#1a2332',
+                                    fontFamily: 'inherit',
+                                    minWidth: 200,
+                                    transition: 'border-color 0.15s',
+                                }}
+                                onFocus={e => {
+                                    e.currentTarget.style.borderColor = '#4c51bf';
+                                    e.currentTarget.style.outline = 'none';
+                                }}
+                                onBlur={e => {
+                                    e.currentTarget.style.borderColor = '#e2e8f0';
+                                }}
+                            />
+                            
+                            <select
+                                value={filterStatus}
+                                onChange={e => setFilterStatus(e.target.value as any)}
+                                style={{
+                                    background: '#f7fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: 8,
+                                    padding: '8px 12px',
+                                    fontSize: 14,
+                                    color: '#1a2332',
+                                    fontFamily: 'inherit',
+                                    cursor: 'pointer',
+                                    transition: 'border-color 0.15s',
+                                }}
+                                onFocus={e => {
+                                    e.currentTarget.style.borderColor = '#4c51bf';
+                                    e.currentTarget.style.outline = 'none';
+                                }}
+                                onBlur={e => {
+                                    e.currentTarget.style.borderColor = '#e2e8f0';
+                                }}
+                            >
+                                <option value="all">All</option>
+                                <option value="checked">Checked In</option>
+                                <option value="not-checked">Not Checked In</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {registrations.length === 0 && (
+                        <div style={{
+                            padding: 60,
+                            textAlign: 'center',
+                            background: '#f7fafc',
+                            borderRadius: 10,
+                            border: '1px solid #e2e8f0',
+                        }}>
+                            <div style={{ fontSize: 48, marginBottom: 12 }}>👥</div>
+                            <p style={{ fontSize: 16, fontWeight: 600, color: '#1a2332', margin: '0 0 6px' }}>
+                                No registered participants yet
+                            </p>
+                            <p style={{ color: '#4a5568', fontSize: 14, margin: 0 }}>
+                                Students who register for this event will appear here.
+                            </p>
+                        </div>
+                    )}
+
+                    {filteredRegistrations.length === 0 && registrations.length > 0 && (
+                        <div style={{
+                            padding: 40,
+                            textAlign: 'center',
+                            background: '#f7fafc',
+                            borderRadius: 10,
+                            border: '1px solid #e2e8f0',
+                        }}>
+                            <p style={{ color: '#4a5568', fontSize: 14, margin: 0 }}>
+                                No participants match your search or filter criteria.
+                            </p>
+                        </div>
+                    )}
+
+                    {filteredRegistrations.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            {filteredRegistrations.map(reg => {
+                                const attendanceRecord = attendance.find(a => a.user_id === reg.user_id);
+                                const isCheckedIn = !!attendanceRecord;
+                                const isCheckingInThis = checkingIn === reg.user_id;
+
+                                return (
+                                    <div
+                                        key={reg._id}
+                                        style={{
+                                            background: isCheckedIn ? '#f0fdf4' : '#ffffff',
+                                            border: `1px solid ${isCheckedIn ? '#bbf7d0' : '#e2e8f0'}`,
+                                            borderRadius: 10,
+                                            padding: '16px 18px',
+                                            display: 'flex',
+                                            flexWrap: 'wrap',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            gap: 16,
+                                            transition: 'all 0.2s',
+                                        }}
+                                    >
+                                        <div style={{ flex: 1, minWidth: 200 }}>
+                                            <p style={{
+                                                fontSize: 14,
+                                                fontWeight: 500,
+                                                color: '#1a2332',
+                                                margin: '0 0 4px',
+                                                fontFamily: 'monospace',
+                                            }}>
+                                                {reg.user_id}
+                                            </p>
+                                            <p style={{ fontSize: 12, color: '#4a5568', margin: 0 }}>
+                                                Registered: {new Date(reg.registration_timestamp).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </p>
+                                        </div>
+
+                                        {isCheckedIn ? (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 8,
+                                                padding: '8px 16px',
+                                                borderRadius: 8,
+                                                background: '#d1fae5',
+                                                border: '1px solid #86efac',
+                                            }}>
+                                                <span style={{ fontSize: 16, color: '#059669' }}>✓</span>
+                                                <span style={{ fontSize: 13, fontWeight: 600, color: '#047857' }}>
+                                                    Checked In
+                                                </span>
+                                                {attendanceRecord && (
+                                                    <span style={{
+                                                        fontSize: 11,
+                                                        color: '#065f46',
+                                                        marginLeft: 4,
+                                                    }}>
+                                                        {new Date(attendanceRecord.check_in_timestamp).toLocaleTimeString('en-US', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                        })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleCheckIn(reg.user_id)}
+                                                disabled={isCheckingInThis}
+                                                style={{
+                                                    background: isCheckingInThis ? '#e2e8f0' : '#4c51bf',
+                                                    border: 'none',
+                                                    borderRadius: 8,
+                                                    padding: '10px 20px',
+                                                    color: isCheckingInThis ? '#718096' : '#fff',
+                                                    fontSize: 14,
+                                                    fontWeight: 600,
+                                                    cursor: isCheckingInThis ? 'not-allowed' : 'pointer',
+                                                    fontFamily: 'inherit',
+                                                    whiteSpace: 'nowrap',
+                                                    transition: 'all 0.15s',
+                                                    minWidth: 120,
+                                                }}
+                                                onMouseEnter={e => {
+                                                    if (!isCheckingInThis) {
+                                                        e.currentTarget.style.background = '#434190';
+                                                    }
+                                                }}
+                                                onMouseLeave={e => {
+                                                    if (!isCheckingInThis) {
+                                                        e.currentTarget.style.background = '#4c51bf';
+                                                    }
+                                                }}
+                                            >
+                                                {isCheckingInThis ? (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                                                        <span style={{
+                                                            width: 12,
+                                                            height: 12,
+                                                            border: '2px solid #cbd5e0',
+                                                            borderTopColor: '#718096',
+                                                            borderRadius: '50%',
+                                                            display: 'inline-block',
+                                                            animation: 'spin 0.6s linear infinite',
+                                                        }} />
+                                                        Checking In...
+                                                    </span>
+                                                ) : (
+                                                    'Check In'
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
