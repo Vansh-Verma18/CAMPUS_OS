@@ -1,21 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Calendar, Building2, Ticket, Sparkles, PlusCircle, BookText, BarChart3, Menu, X, Search, Command } from 'lucide-react';
-
-const ROLE_COLOR: Record<string, string> = {
-    admin: '#4f46e5',
-    faculty: '#3b82f6',
-    organizer: '#10b981',
-    student: '#f59e0b',
-};
-
-const ROLE_BG: Record<string, string> = {
-    admin: '#eef2ff',
-    faculty: '#dbeafe',
-    organizer: '#d1fae5',
-    student: '#fef3c7',
-};
+import { LayoutDashboard, Calendar, Building2, Ticket, Sparkles, PlusCircle, BookText, BarChart3, Search, LogOut } from 'lucide-react';
 
 interface NavItem {
     path: string;
@@ -39,7 +25,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [collapsed, setCollapsed] = useState(false);
 
     if (!user) return null;
 
@@ -47,8 +32,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         item => !item.roles || item.roles.includes(user.role)
     );
 
-    const roleColor = ROLE_COLOR[user.role] ?? '#64748b';
-    const roleBg = ROLE_BG[user.role] ?? '#f1f5f9';
     const initials = user.display_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
     // Get current page title
@@ -58,411 +41,379 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#fafbfc',
+            background: '#ECE7F4',
             display: 'flex',
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
-            color: '#0f172a',
+            fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+            color: '#1E192B',
+            position: 'relative',
+            overflow: 'hidden',
         }}>
-            {/* Premium Sidebar */}
-            <aside style={{
-                width: collapsed ? 80 : 280,
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+                
+                .sidebar-glass {
+                    background: rgba(18, 14, 28, 0.78);
+                    backdrop-filter: blur(24px);
+                    -webkit-backdrop-filter: blur(24px);
+                    border-right: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 12px 0 35px -5px rgba(139, 92, 246, 0.15);
+                }
+                
+                .active-nav-glow {
+                    background: linear-gradient(90deg, rgba(217, 70, 239, 0.28) 0%, rgba(139, 92, 246, 0.38) 100%);
+                    box-shadow: 0 0 20px -2px rgba(217, 70, 239, 0.6), inset 0 0 12px rgba(236, 72, 153, 0.4);
+                    border: 1.5px solid rgba(244, 114, 182, 0.7);
+                }
+                
+                .nav-item-hover:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+                
+                @keyframes pulse-dot {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.3; }
+                }
+            `}</style>
+
+            {/* Ambient floating background glows */}
+            <div style={{
+                position: 'fixed',
+                top: '96px',
+                right: '192px',
+                width: '384px',
+                height: '384px',
+                background: 'rgba(216, 180, 254, 0.3)',
+                borderRadius: '50%',
+                filter: 'blur(100px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+            }} />
+            <div style={{
+                position: 'fixed',
+                bottom: '40px',
+                left: '320px',
+                width: '320px',
+                height: '320px',
+                background: 'rgba(251, 207, 232, 0.25)',
+                borderRadius: '50%',
+                filter: 'blur(100px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+            }} />
+            <div style={{
+                position: 'fixed',
+                top: '50%',
+                right: '25%',
+                width: '288px',
+                height: '288px',
+                background: 'rgba(165, 243, 252, 0.3)',
+                borderRadius: '50%',
+                filter: 'blur(100px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+            }} />
+
+            {/* Glassmorphic Dark Sidebar */}
+            <aside className="sidebar-glass" style={{
+                width: '260px',
                 minHeight: '100vh',
-                background: '#ffffff',
-                borderRight: '1px solid #e2e8f0',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'width 0.3s ease',
+                justifyContent: 'space-between',
                 flexShrink: 0,
-                position: 'sticky',
+                position: 'fixed',
                 top: 0,
-                height: '100vh',
-                overflow: 'hidden',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+                bottom: 0,
+                left: 0,
+                zIndex: 30,
+                borderRadius: '0 24px 24px 0',
             }}>
-                {/* Logo */}
-                <div style={{
-                    padding: collapsed ? '28px 20px' : '28px 24px',
-                    borderBottom: '1px solid #f1f5f9',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    justifyContent: collapsed ? 'center' : 'space-between',
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}
-                        onClick={() => navigate('/dashboard')}>
-                        {/* Premium logo icon */}
-                        <div style={{
-                            width: 42,
-                            height: 42,
-                            borderRadius: 12,
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 20,
-                            flexShrink: 0,
-                            color: '#ffffff',
-                            boxShadow: '0 4px 6px -1px rgba(102, 126, 234, 0.4)',
-                        }}>
-                            🎓
-                        </div>
-                        {!collapsed && (
-                            <div>
-                                <div style={{
-                                    fontWeight: 700,
-                                    fontSize: 20,
-                                    color: '#0f172a',
-                                    letterSpacing: '-0.02em',
-                                    whiteSpace: 'nowrap',
-                                    lineHeight: 1,
-                                    marginBottom: 4,
-                                }}>CampusOS</div>
-                                <div style={{
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    color: '#64748b',
-                                    letterSpacing: '0.05em',
-                                    textTransform: 'uppercase',
-                                }}>Campus Intelligence</div>
-                            </div>
-                        )}
-                    </div>
-                    {!collapsed && (
-                        <button
-                            onClick={() => setCollapsed(true)}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#94a3b8',
-                                cursor: 'pointer',
-                                padding: 6,
-                                borderRadius: 6,
-                                lineHeight: 1,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s',
-                            }}
-                            title="Collapse sidebar"
-                            onMouseEnter={e => {
-                                e.currentTarget.style.background = '#f8fafc';
-                                e.currentTarget.style.color = '#64748b';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.background = 'none';
-                                e.currentTarget.style.color = '#94a3b8';
-                            }}
-                        >
-                            <X size={18} />
-                        </button>
-                    )}
-                </div>
-
-                {/* Expand button (when collapsed) */}
-                {collapsed && (
-                    <button
-                        onClick={() => setCollapsed(false)}
+                {/* Top Section: Brand & Nav */}
+                <div style={{ padding: '24px' }}>
+                    {/* Logo */}
+                    <div 
                         style={{
-                            position: 'absolute',
-                            bottom: 100,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            background: '#ffffff',
-                            border: '1px solid #e2e8f0',
-                            color: '#64748b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            marginBottom: '32px',
                             cursor: 'pointer',
-                            padding: '8px 10px',
-                            borderRadius: 8,
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        }}
+                        onClick={() => navigate('/dashboard')}
+                    >
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            transition: 'all 0.2s',
-                        }}
-                        title="Expand sidebar"
-                        onMouseEnter={e => {
-                            e.currentTarget.style.background = '#f8fafc';
-                            e.currentTarget.style.color = '#4f46e5';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.background = '#ffffff';
-                            e.currentTarget.style.color = '#64748b';
-                        }}
-                    >
-                        <Menu size={18} />
-                    </button>
-                )}
+                            boxShadow: '0 0 15px rgba(217, 70, 239, 0.7)',
+                        }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M21 3H3C1.9 3 1 3.9 1 5v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 14H4c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h16c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z"/>
+                                <path d="M12 8l-4 4h3v4h2v-4h3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style={{
+                                fontSize: '24px',
+                                fontWeight: 800,
+                                letterSpacing: '-0.02em',
+                                background: 'linear-gradient(90deg, #ffffff 0%, #d8b4fe 50%, #fbcfe8 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}>
+                                CampusOS
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Nav */}
-                <nav style={{ flex: 1, padding: '20px 16px', overflow: 'auto' }}>
-                    {!collapsed && (
-                        <p style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: '#94a3b8',
-                            letterSpacing: '0.08em',
-                            textTransform: 'uppercase',
-                            padding: '0 12px',
-                            marginBottom: 16,
-                        }}>Navigation</p>
-                    )}
-                    {visibleNav.map(item => {
-                        const isActive = location.pathname === item.path;
-                        const IconComponent = item.icon;
-                        return (
-                            <button
-                                key={item.path}
-                                onClick={() => navigate(item.path)}
-                                title={collapsed ? item.label : undefined}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: collapsed ? 0 : 14,
-                                    justifyContent: collapsed ? 'center' : 'flex-start',
-                                    padding: collapsed ? '14px 0' : '12px 14px',
-                                    borderRadius: 10,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: 15,
-                                    fontWeight: isActive ? 600 : 500,
-                                    fontFamily: 'inherit',
-                                    color: isActive ? '#4f46e5' : '#475569',
-                                    background: isActive ? '#eef2ff' : 'transparent',
-                                    marginBottom: 4,
-                                    transition: 'all 0.2s ease',
-                                    textAlign: 'left',
-                                    position: 'relative',
-                                    boxShadow: isActive ? '0 1px 3px 0 rgba(79, 70, 229, 0.1)' : 'none',
-                                }}
-                                onMouseEnter={e => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = '#f8fafc';
-                                        e.currentTarget.style.color = '#0f172a';
-                                    }
-                                    const icon = e.currentTarget.querySelector('.nav-icon') as HTMLElement;
-                                    if (icon) icon.style.transform = 'translateX(2px)';
-                                }}
-                                onMouseLeave={e => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#475569';
-                                    }
-                                    const icon = e.currentTarget.querySelector('.nav-icon') as HTMLElement;
-                                    if (icon) icon.style.transform = '';
-                                }}
-                            >
-                                {isActive && !collapsed && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        left: 0,
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        width: 3,
-                                        height: '60%',
-                                        background: '#4f46e5',
-                                        borderRadius: '0 4px 4px 0',
-                                    }} />
-                                )}
-                                <span
-                                    className="nav-icon"
+                    {/* Section Label */}
+                    <p style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: 'rgba(255, 255, 255, 0.45)',
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        marginBottom: '16px',
+                        paddingLeft: '8px',
+                    }}>
+                        Navigation
+                    </p>
+
+                    {/* Navigation Menu */}
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {visibleNav.map(item => {
+                            const isActive = location.pathname === item.path;
+                            const IconComponent = item.icon;
+                            return (
+                                <button
+                                    key={item.path}
+                                    onClick={() => navigate(item.path)}
+                                    className={isActive ? 'active-nav-glow' : 'nav-item-hover'}
                                     style={{
-                                        lineHeight: 1,
-                                        flexShrink: 0,
-                                        transition: 'transform 0.2s ease',
                                         display: 'flex',
                                         alignItems: 'center',
+                                        gap: '14px',
+                                        padding: '10px 16px',
+                                        borderRadius: '9999px',
+                                        color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+                                        fontSize: '14px',
+                                        fontWeight: isActive ? 600 : 500,
+                                        cursor: 'pointer',
+                                        border: 'none',
+                                        background: 'transparent',
+                                        fontFamily: 'inherit',
+                                        transition: 'all 0.2s ease',
+                                        textAlign: 'left',
+                                        width: '100%',
+                                        letterSpacing: '0.01em',
                                     }}
                                 >
-                                    <IconComponent size={20} strokeWidth={2.5} />
-                                </span>
-                                {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
-                            </button>
-                        );
-                    })}
-                </nav>
+                                    <IconComponent size={16} strokeWidth={2.5} style={{
+                                        color: isActive ? '#FCA5D2' : '#5EEAD4',
+                                        flexShrink: 0,
+                                    }} />
+                                    <span>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
 
-                {/* User card */}
+                {/* Bottom Profile Area */}
                 <div style={{
-                    padding: collapsed ? '20px 16px' : '20px',
-                    borderTop: '1px solid #f1f5f9',
+                    padding: '20px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                 }}>
-                    {!collapsed ? (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        background: 'rgba(0, 0, 0, 0.4)',
+                        padding: '10px',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                    }}>
                         <div style={{
-                            background: roleBg,
-                            border: `1px solid ${roleColor}22`,
-                            borderRadius: 12,
-                            padding: '16px',
-                            transition: 'all 0.2s',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            flexShrink: 0,
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                                <div style={{
-                                    width: 42,
-                                    height: 42,
-                                    borderRadius: '50%',
-                                    background: roleColor,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 14,
-                                    fontWeight: 700,
-                                    color: '#ffffff',
-                                    flexShrink: 0,
-                                    boxShadow: `0 2px 8px ${roleColor}40`,
-                                }}>{initials}</div>
-                                <div style={{ overflow: 'hidden', flex: 1 }}>
-                                    <p style={{
-                                        fontSize: 15,
-                                        fontWeight: 600,
-                                        color: '#0f172a',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        marginBottom: 4,
-                                    }}>
-                                        {user.display_name}
-                                    </p>
-                                    <p style={{
-                                        fontSize: 11,
-                                        fontWeight: 700,
-                                        letterSpacing: '0.05em',
-                                        textTransform: 'uppercase',
-                                        color: roleColor,
-                                    }}>
-                                        {user.role}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => { logout(); navigate('/login'); }}
-                                style={{
-                                    width: '100%',
-                                    background: '#ffffff',
-                                    border: '1px solid #e2e8f0',
-                                    color: '#475569',
-                                    padding: '10px 0',
-                                    borderRadius: 8,
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    fontFamily: 'inherit',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#0f172a';
-                                    e.currentTarget.style.background = '#f8fafc';
-                                    e.currentTarget.style.borderColor = '#cbd5e1';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.color = '#475569';
-                                    e.currentTarget.style.background = '#ffffff';
-                                    e.currentTarget.style.borderColor = '#e2e8f0';
-                                }}
-                            >Sign out</button>
+                            {initials}
                         </div>
-                    ) : (
-                        <button
-                            onClick={() => { logout(); navigate('/login'); }}
-                            title="Sign out"
-                            style={{
-                                width: '100%',
-                                background: 'none',
-                                border: 'none',
-                                color: '#94a3b8',
-                                cursor: 'pointer',
-                                fontSize: 20,
-                                padding: '8px 0',
-                                textAlign: 'center',
-                                transition: 'color 0.2s',
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.color = '#64748b';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.color = '#94a3b8';
-                            }}
-                        >↩</button>
-                    )}
+                        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                <p style={{
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    color: '#ffffff',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}>
+                                    {user.display_name}
+                                </p>
+                                <span style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    background: '#34D399',
+                                    animation: 'pulse-dot 2s ease-in-out infinite',
+                                    flexShrink: 0,
+                                }} />
+                            </div>
+                            <p style={{
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                letterSpacing: '0.08em',
+                                textTransform: 'uppercase',
+                                color: 'rgba(255, 255, 255, 0.4)',
+                            }}>
+                                {user.role}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => { logout(); navigate('/login'); }}
+                        style={{
+                            marginTop: '12px',
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '9999px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: '#FCA5D2',
+                            border: '1px solid rgba(252, 165, 210, 0.5)',
+                            background: 'rgba(236, 72, 153, 0.1)',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            transition: 'all 0.2s ease',
+                            textAlign: 'center',
+                            letterSpacing: '0.02em',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.borderColor = '#F472B6';
+                            e.currentTarget.style.background = 'rgba(236, 72, 153, 0.2)';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.color = '#FCA5D2';
+                            e.currentTarget.style.borderColor = 'rgba(252, 165, 210, 0.5)';
+                            e.currentTarget.style.background = 'rgba(236, 72, 153, 0.1)';
+                        }}
+                    >
+                        <LogOut size={14} />
+                        Sign out
+                    </button>
                 </div>
             </aside>
 
-            {/* Main content area with top header */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                {/* Premium Top Header */}
+            {/* Main content area */}
+            <div style={{
+                flex: 1,
+                marginLeft: '260px',
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh',
+                position: 'relative',
+                zIndex: 1,
+            }}>
+                {/* Top Header */}
                 <header style={{
-                    background: '#ffffff',
-                    borderBottom: '1px solid #e2e8f0',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    borderBottom: '1px solid rgba(226, 219, 237, 0.8)',
                     padding: '16px 32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: 32,
+                    gap: '32px',
                     position: 'sticky',
                     top: 0,
                     zIndex: 10,
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
                 }}>
-                    {/* Breadcrumb / Page title */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {/* Page title */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{
-                            fontSize: 20,
-                            color: '#0f172a',
+                            fontSize: '24px',
+                            color: '#1a202c',
                             fontWeight: 700,
-                            letterSpacing: '-0.01em',
+                            letterSpacing: '-0.02em',
                         }}>
                             {pageTitle}
                         </span>
                     </div>
 
-                    {/* AI Search Command Bar */}
-                    <div style={{ flex: 1, maxWidth: 560 }}>
-                        <button
+                    {/* AI Search Bar */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '320px' }}>
+                        <input
+                            type="text"
+                            placeholder="Ask CampusOS anything..."
                             onClick={() => navigate('/ai')}
+                            readOnly
                             style={{
                                 width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 12,
-                                padding: '12px 18px',
-                                background: '#fafbfc',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: 12,
-                                fontSize: 15,
-                                color: '#64748b',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                backdropFilter: 'blur(12px)',
+                                border: '1px solid rgba(139, 92, 246, 0.3)',
+                                borderRadius: '9999px',
+                                paddingLeft: '40px',
+                                paddingRight: '48px',
+                                paddingTop: '8px',
+                                paddingBottom: '8px',
+                                fontSize: '13px',
+                                color: '#4a5568',
                                 cursor: 'pointer',
                                 fontFamily: 'inherit',
-                                transition: 'all 0.2s',
-                                textAlign: 'left',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 4px rgba(139, 92, 246, 0.1)',
                             }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.borderColor = '#c7d2fe';
-                                e.currentTarget.style.background = '#ffffff';
-                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                            onFocus={e => {
+                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
                             }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.borderColor = '#e2e8f0';
-                                e.currentTarget.style.background = '#fafbfc';
-                                e.currentTarget.style.boxShadow = '';
+                            onBlur={e => {
+                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(139, 92, 246, 0.1)';
                             }}
-                        >
-                            <Search size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                            <span style={{ flex: 1 }}>Ask CampusOS...</span>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 4,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                background: '#ffffff',
-                                padding: '4px 10px',
-                                borderRadius: 6,
-                                border: '1px solid #e2e8f0',
-                                color: '#64748b',
-                            }}>
-                                <Command size={12} />
-                                <span>K</span>
-                            </div>
-                        </button>
+                        />
+                        <Search size={16} style={{
+                            position: 'absolute',
+                            left: '14px',
+                            color: '#8B5CF6',
+                        }} />
+                        <span style={{
+                            position: 'absolute',
+                            right: '10px',
+                            background: '#e5e7eb',
+                            border: '1px solid #d1d5db',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            color: '#6b7280',
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                        }}>
+                            AI
+                        </span>
                     </div>
                 </header>
 
