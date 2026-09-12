@@ -260,7 +260,8 @@ export default function Events() {
     const [events, setEvents] = useState<EventResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [debouncedSearch, setDebouncedSearch] = useState<string>('');
     const [categoryFilter, setCategoryFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
 
@@ -280,9 +281,24 @@ export default function Events() {
         }
     };
 
+    // Debounce search input by 300ms
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     useEffect(() => {
         fetchEvents();
     }, [categoryFilter, statusFilter]);
+
+    // Client-side search filter
+    const filteredEvents = debouncedSearch
+        ? events.filter(e =>
+            e.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+            (e.description ?? '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+            e.category.toLowerCase().includes(debouncedSearch.toLowerCase())
+        )
+        : events;
 
     const categories = Array.from(new Set(events.map(e => e.category))).sort();
     const statuses = ['scheduled', 'ongoing', 'completed', 'cancelled'];
@@ -355,14 +371,67 @@ export default function Events() {
                     </div>
                 </div>
 
-                {/* Filters */}
+                {/* Search + Filters */}
                 <div style={{
                     display: 'flex',
                     gap: 12,
                     marginBottom: 24,
                     flexWrap: 'wrap',
+                    alignItems: 'center',
                     animation: 'fadeIn 0.4s ease 0.1s both',
                 }}>
+                    {/* Search Bar */}
+                    <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 200 }}>
+                        <span style={{
+                            position: 'absolute',
+                            left: 12,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            fontSize: 16,
+                            color: '#a0aec0',
+                            pointerEvents: 'none',
+                        }}>🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Search events by name, description, or category..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: 8,
+                                padding: '9px 12px 9px 38px',
+                                color: '#1a2332',
+                                fontSize: 14,
+                                fontFamily: 'inherit',
+                                outline: 'none',
+                                boxSizing: 'border-box',
+                                transition: 'border-color 0.15s',
+                            }}
+                            onFocus={e => { e.currentTarget.style.borderColor = '#667eea'; }}
+                            onBlur={e => { e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                style={{
+                                    position: 'absolute',
+                                    right: 10,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#a0aec0',
+                                    cursor: 'pointer',
+                                    fontSize: 16,
+                                    padding: 0,
+                                    lineHeight: 1,
+                                }}
+                            >✕</button>
+                        )}
+                    </div>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <label style={{ fontSize: 14, color: '#4a5568', fontWeight: 500 }}>Category:</label>
                         <select
@@ -411,11 +480,12 @@ export default function Events() {
                         </select>
                     </div>
 
-                    {(categoryFilter || statusFilter) && (
+                    {(categoryFilter || statusFilter || searchQuery) && (
                         <button
                             onClick={() => {
                                 setCategoryFilter('');
                                 setStatusFilter('');
+                                setSearchQuery('');
                             }}
                             style={{
                                 background: '#ffffff',
@@ -481,7 +551,7 @@ export default function Events() {
                             Retry
                         </button>
                     </div>
-                ) : events.length === 0 ? (
+                                ) : filteredEvents.length === 0 ? (
                     <div style={{
                         textAlign: 'center',
                         padding: '60px 20px',
@@ -499,15 +569,17 @@ export default function Events() {
                             fontSize: 28,
                             margin: '0 auto 16px',
                         }}>
-                            📅
+                            {debouncedSearch ? '🔍' : '📅'}
                         </div>
                         <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1a2332', margin: '0 0 8px' }}>
-                            No events found
+                            {debouncedSearch ? `No results for "${debouncedSearch}"` : 'No events found'}
                         </h2>
                         <p style={{ color: '#4a5568', fontSize: 14, margin: 0 }}>
-                            {categoryFilter || statusFilter
-                                ? 'Try adjusting your filters to see more events.'
-                                : 'Check back later for upcoming campus events.'}
+                            {debouncedSearch
+                                ? 'Try a different search term or clear the filters.'
+                                : categoryFilter || statusFilter
+                                    ? 'Try adjusting your filters to see more events.'
+                                    : 'Check back later for upcoming campus events.'}
                         </p>
                     </div>
                 ) : (
@@ -517,7 +589,7 @@ export default function Events() {
                         gap: 16,
                         animation: 'fadeIn 0.4s ease 0.15s both',
                     }}>
-                        {events.map(event => (
+                        {filteredEvents.map(event => (
                             <EventCard
                                 key={event._id}
                                 event={event}
@@ -528,14 +600,15 @@ export default function Events() {
                 )}
 
                 {/* Footer count */}
-                {!loading && !error && events.length > 0 && (
+                {!loading && !error && filteredEvents.length > 0 && (
                     <div style={{
                         marginTop: 32,
                         textAlign: 'center',
                         color: '#718096',
                         fontSize: 13,
                     }}>
-                        Showing {events.length} {events.length === 1 ? 'event' : 'events'}
+                        Showing {filteredEvents.length}{debouncedSearch ? ` of ${events.length}` : ''} {filteredEvents.length === 1 ? 'event' : 'events'}
+                        {debouncedSearch && <span style={{ color: '#667eea', marginLeft: 4 }}>matching "{debouncedSearch}"</span>}
                     </div>
                 )}
             </div>
